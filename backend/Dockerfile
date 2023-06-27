@@ -16,13 +16,5 @@ RUN pip install -r requirements.txt --no-cache-dir
 
 COPY . .
 
-# CMD ["gunicorn", "--bind", "0.0.0.0:9000", "kittygram_backend.wsgi"]
-
 RUN apk add make
 CMD make gunicorn port=${OUT_PORT_FOODGRAM}
-# worked
-
-# COPY ./entrypoint.sh /
-# RUN chmod +x /entrypoint.sh
-# ENTRYPOINT ./entrypoint.sh ${OUT_PORT_KITTYGRAM}
-# worked

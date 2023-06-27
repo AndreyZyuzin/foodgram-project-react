@@ -10,9 +10,4 @@ v1_router = DefaultRouter()
 
 urlpatterns = [
     path('v1/', include(v1_router.urls)),
-    path(
-        'docs/',
-        TemplateView.as_view(template_name='redoc.html'),
-        name='redoc'
-    ),
 ]
