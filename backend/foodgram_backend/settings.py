@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 import os
+from datetime import timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -39,6 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework_simplejwt',
+    'django_filters',
+    'users.apps.UsersConfig',
     'api.apps.ApiConfig',
     'recipes.apps.RecipesConfig',
 ]
@@ -55,12 +59,11 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'foodgram_backend.urls'
 
-TEMPLATES_DIR = os.path.join(BASE_DIR, 'docs')
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [TEMPLATES_DIR],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -134,9 +137,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'docs/'
+STATIC_URL = '/static/'
 
-STATICFILES_DIRS = ((BASE_DIR / 'docs/'), (BASE_DIR / 'static/'))
+STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -145,3 +148,30 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+############################################################
+# ТУТ НАЧИНАЮТСЯ КАСТОМНЫЕ НАСТРОЙКИ
+AUTH_USER_MODEL = 'users.CustomUser'
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+# Эмуляция почтового сервера
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
+# Доменное имя для сообщения о регистрации
+DOMAIN_NAME = 'registration@foodgram.com'
+
+# Работа токенов
+# Пускай пока срок годности access токена будет неделя
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=7),
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    # По дефолту и так Bearer, обозначу это явно
+}
+
