@@ -1,14 +1,10 @@
 from django.db import models
 from django.core.validators import RegexValidator, MinValueValidator
 
+from users.models import CustomUser
 
 class Tag(models.Model):
-    """Модель тегов.
-    
-    По ТЗ name возможен быть не уникальным. Но возможно добавить unique=True.
-    По ТЗ сolor не уточнено. Сделано на выбор 3-численные и 6-численные
-    компоненты RGB.
-    """
+    """Модель тегов."""
     name = models.CharField(max_length=200,
                             unique=True,
                             verbose_name='Название',
@@ -41,7 +37,6 @@ class Tag(models.Model):
 
 class Ingredient(models.Model):
     """Модель ингредиентов."""
-
     name = models.CharField(max_length=200,
                             unique=True,
                             verbose_name='Название',
@@ -67,9 +62,14 @@ class Ingredient(models.Model):
         return self.name
 
 
-
 class Recipe(models.Model):
-    # author
+    author = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='recipes',
+        verbose_name='Автор',
+        help_text='Автор рецепта',
+    )
     name = models.CharField(max_length=200,
                             verbose_name='Название',
                             help_text='Название рецепта', )
@@ -84,6 +84,25 @@ class Recipe(models.Model):
                                          help_text='Ингредиенты рецепта',)
     tags = models.ManyToManyField(Tag,
                                   verbose_name='Тег',
-                                  help_text='Тег',)
+                                  help_text='Теги рецепта',)
     cooking_time = models.IntegerField(verbose_name='Время готовки',
                                        help_text='Время готовки в минутах', )
+
+    def get_tag(self):
+        return ', '.join([tag.name for tag in self.tags.all()])
+
+    get_tag.short_description = 'Теги'
+
+
+    def get_ingredient(self):
+        return ', '.join(
+            [ingredient.name for ingredient in self.ingredients.all()])
+
+    get_ingredient.short_description = 'Ингредиенты'
+    
+    class Meta:
+        verbose_name = 'Рецепт'
+        verbose_name_plural = 'Рецепты'
+
+    def __str__(self):
+        return self.name
