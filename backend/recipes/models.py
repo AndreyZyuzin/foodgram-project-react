@@ -141,8 +141,8 @@ class Subscription(models.Model):
 class Favorite(models.Model):
     """Модель избранное."""
     class Meta:
-        verbose_name = 'Подписка'
-        verbose_name_plural = 'Подписки'
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранное'
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'recipe'],
