@@ -63,6 +63,7 @@ class Ingredient(models.Model):
 
 
 class Recipe(models.Model):
+    """Модель рецепта."""
     author = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
@@ -106,3 +107,33 @@ class Recipe(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Subscription(models.Model):
+    """Модель подписки."""
+    class Meta:
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'following'],
+                name='unique_following_user',
+            )
+        ]
+
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='follower',
+        verbose_name='Автор',
+        help_text='Автор',
+    )
+
+    following = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='following',
+        verbose_name='Подписчики',
+        help_text='Подписчики',
+    )
+    
