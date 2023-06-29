@@ -163,3 +163,30 @@ class Favorite(models.Model):
         related_name='favorites',
         verbose_name='Пользователь',
     )
+
+
+class Cart(models.Model):
+    """Модель Списка покупок."""
+    class Meta:
+        verbose_name = 'Корзина'
+        verbose_name_plural = 'Корзина'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'ingredient'],
+                name='unique_user_ingredient',
+            )
+        ]
+
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='cart',
+        verbose_name='Пользователь',
+    )
+
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE,
+        related_name='cart',
+        verbose_name='Ингредиент',
+    )
