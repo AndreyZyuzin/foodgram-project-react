@@ -3,35 +3,12 @@ from django.contrib.auth.models import AbstractUser
 
 
 class CustomUser(AbstractUser):
-    class Status(models.Choices):
-        GUEST = 'guest'
-        USER = 'user'
-        ADMIN = 'admin'
-
-    username = models.CharField(
-        'Имя пользователя',
-        max_length=150,
-        blank=False,
-        unique=True,
-    )
-
+    """Модель пользователя."""
     email = models.EmailField(
         'Электронная почта',
         max_length=254,
         unique=True,
         blank=False,
-    )
-
-    confirmation_code = models.CharField(
-        'Код подтверждения',
-        max_length=300,
-    )
-
-    role = models.CharField(
-        'Роль пользователя',
-        max_length=20,
-        default=Status.USER,
-        choices=Status.choices
     )
 
     first_name = models.CharField(
@@ -46,19 +23,13 @@ class CustomUser(AbstractUser):
         max_length=150,
     )
 
-    @property
-    def is_admin(self):
-        return self.role == 'admin'
-
-    @property
-    def is_user(self):
-        return self.role == 'user'
-
-    @property
-    def is_guest(self):
-        return self.role == 'guest'
+    REQUIRED_FIELDS = ['email', 'last_name', 'first_name']
 
     class Meta:
         ordering = ('id',)
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
+    
+    def __str__(self):
+        return self.username
+

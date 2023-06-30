@@ -22,11 +22,22 @@ class RecipeAdmin(admin.ModelAdmin):
                     'text',
                     'get_tag',
                     'get_ingredient',
-                    'cooking_time',)
+                    'cooking_time',
+                    )
+    list_display_links = ('pk', 'text')  # Поле, при нажатие идет в редактор.
+    list_editable = ('name', 'cooking_time')
     # search_fields = ('name', 'tag__name', 'ingredient__name')
     # ordering = ('name', 'tag__name', 'ingredient__name')
     # raw_id_fields = ('tags', 'ingredients')
-    
+
+    def get_tag(self, recipe):
+        return ', '.join([tag.name for tag in recipe.tags.all()])
+    get_tag.short_description = 'Теги'
+
+    def get_ingredient(self, recipe):
+        return ', '.join(
+            [ingredient.name for ingredient in recipe.ingredients.all()])
+    get_ingredient.short_description = 'Ингредиенты'
 
 class SubscriptionAdmin(admin.ModelAdmin):
     list_display = ('user', 'following')

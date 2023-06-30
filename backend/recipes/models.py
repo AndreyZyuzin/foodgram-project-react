@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.validators import RegexValidator, MinValueValidator
+from django.conf import settings
 
-from users.models import CustomUser
 
 class Tag(models.Model):
     """Модель тегов."""
@@ -65,7 +65,7 @@ class Ingredient(models.Model):
 class Recipe(models.Model):
     """Модель рецепта."""
     author = models.ForeignKey(
-        CustomUser,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='recipes',
         verbose_name='Автор',
@@ -89,18 +89,6 @@ class Recipe(models.Model):
     cooking_time = models.IntegerField(verbose_name='Время готовки',
                                        help_text='Время готовки в минутах', )
 
-    def get_tag(self):
-        return ', '.join([tag.name for tag in self.tags.all()])
-
-    get_tag.short_description = 'Теги'
-
-
-    def get_ingredient(self):
-        return ', '.join(
-            [ingredient.name for ingredient in self.ingredients.all()])
-
-    get_ingredient.short_description = 'Ингредиенты'
-    
     class Meta:
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
@@ -122,7 +110,7 @@ class Subscription(models.Model):
         ]
 
     user = models.ForeignKey(
-        CustomUser,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='follower',
         verbose_name='Автор',
@@ -130,7 +118,7 @@ class Subscription(models.Model):
     )
 
     following = models.ForeignKey(
-        CustomUser,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='following',
         verbose_name='Подписчики',
@@ -158,7 +146,7 @@ class Favorite(models.Model):
     )
 
     user = models.ForeignKey(
-        CustomUser,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='favorites',
         verbose_name='Пользователь',
@@ -178,7 +166,7 @@ class Cart(models.Model):
         ]
 
     user = models.ForeignKey(
-        CustomUser,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='cart',
         verbose_name='Пользователь',
