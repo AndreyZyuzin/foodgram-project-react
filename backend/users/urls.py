@@ -1,9 +1,9 @@
 from django.urls import include, path
-
+# from rest_framework.authtoken import views
 
 urlpatterns = [
-    # path('auth/signup/', SignUpView.as_view(), name='user_create'),
-    # path('auth/token/', TokenReceiveView.as_view(), name='token_receive'),
     path('', include('djoser.urls')),
-    path('auth/', include('djoser.urls.jwt')),
+    path('auth/', include('djoser.urls.authtoken')),
+    # path('auth/', include('djoser.urls.jwt')),
+    # path('auth/', views.obtain_auth_token)
 ]
