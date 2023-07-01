@@ -164,8 +164,6 @@ REST_FRAMEWORK = {
         # 'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     ),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 6,
 }
 
 DJOSER = {
@@ -173,8 +171,15 @@ DJOSER = {
     'LOGIN_FIELD': 'email',
     'SERIALIZERS': {
         'user': 'api.serializers.CustomUserSerializer',
+#        'user_create': 'api.serializers.CustomUserCreateSerializer',
         'current_user': 'api.serializers.CustomUserSerializer',
     },
+#    'PERMISSIONS': {
+#        'user': ['djoser.permissions.CurrentUserOrAdmin'],
+#        'user_list': ['djoser.permissions.CurrentUserOrAdmin'],
+#        'user_create': ['rest_framework.permissions.AllowAny'],
+#        'current_user': ['rest_framework.permissions.AllowAny'],
+#    },
 }
 
 
