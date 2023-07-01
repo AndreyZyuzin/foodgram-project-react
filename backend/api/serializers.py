@@ -2,6 +2,8 @@ from rest_framework import serializers
 from djoser.serializers import UserSerializer
 
 from users.models import CustomUser
+from recipes.models import Tag
+
 
 
 
@@ -21,3 +23,9 @@ class CustomUserSerializer(UserSerializer):
     def get_is_subscribed(self, obj):
         """Проверка является пользователь подписчиком автора."""
         return True
+
+
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = '__all__'
+        model = Tag
