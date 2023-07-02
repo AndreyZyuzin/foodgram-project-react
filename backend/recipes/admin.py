@@ -1,6 +1,7 @@
 from django.contrib import admin
 
-from .models import Cart, Favorite, Ingredient, Recipe, Subscription, Tag
+from .models import (Cart, Favorite, Ingredient, IngredientParam, Recipe,
+                     Subscription, Tag)
 
 
 class TagAdmin(admin.ModelAdmin):
@@ -9,11 +10,30 @@ class TagAdmin(admin.ModelAdmin):
     ordering = ('pk', 'name', 'slug')
 
 
-class IngredientAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'name', 'amount', 'measurement_unit')
+class IngredientParamAdmin(admin.ModelAdmin):
+    list_display = ('pk', 'name', 'measurement_unit')
+    list_display_links = ('name', 'measurement_unit')
     search_fields = ('name', )
-    ordering = ('pk', 'name')
-    
+    ordering = ('pk', 'name')    
+
+class IngredientAdmin(admin.ModelAdmin):
+    list_display = ('pk', 'get_info', 'amount',)
+    list_display_links = ('pk', 'get_info')
+    list_editable = ('amount',)
+
+    def get_name(self, ingredient):
+        return ingredient.parametrs.name
+    get_name.short_description = 'Имя'
+
+    def get_measurement_unit(self, ingredient):
+        return ingredient.parametrs.measurement_unit
+    get_name.short_description = 'Размерность'
+
+    def get_info(self, ingredient):
+        return (f'{ingredient.parametrs.name}, '
+                f'{ingredient.parametrs.measurement_unit}')
+    get_name.short_description = 'Размерность'
+
 
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('pk',
@@ -52,6 +72,7 @@ class CartAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Tag, TagAdmin)
+admin.site.register(IngredientParam, IngredientParamAdmin)
 admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Subscription, SubscriptionAdmin)

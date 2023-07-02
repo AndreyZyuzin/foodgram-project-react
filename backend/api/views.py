@@ -1,14 +1,14 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from djoser.permissions import CurrentUserOrAdmin
-# from djoser.serializers import UserCreateSerializer
 
-from recipes.models import Tag
+
+from recipes.models import IngredientParam, Tag
 from users.models import CustomUser
 from .serializers import (CustomUserCreateSerializer, CustomUserSerializer,
-                          TagSerializer)
+                          IngredientParamSerializer, TagSerializer)
 from .pagination import CustomUsersPagination
-from .permissions import PermissionsForUsers
+from .permissions import PermissionsForUsers, isAdmin
 
 
 class CustomUserViewSet(viewsets.ModelViewSet):
@@ -32,3 +32,11 @@ class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     http_method_names = ['get']
+    permission_classes = (isAdmin, )
+
+
+class IngredientParamViewSet(viewsets.ModelViewSet):
+    queryset = IngredientParam.objects.all()
+    serializer_class = IngredientParamSerializer
+    http_method_names = ['get']
+    permission_classes = (isAdmin, )

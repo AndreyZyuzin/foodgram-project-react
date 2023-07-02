@@ -35,21 +35,12 @@ class Tag(models.Model):
         return self.name
 
 
-class Ingredient(models.Model):
-    """Модель ингредиентов."""
+class IngredientParam(models.Model):
+    """Часть модели ингредиентов."""
     name = models.CharField(max_length=200,
                             unique=True,
                             verbose_name='Название',
                             help_text='Название ингредиента', )
-    amount = models.IntegerField(
-        verbose_name='Количество',
-        help_text='Количество ингредиентов',
-        validators=[
-            MinValueValidator(
-                limit_value=0,
-                message='Количество ингредиентов не должно быть отрицательным.'
-                ),]
-        )
     measurement_unit = models.CharField(max_length=40,
                             verbose_name='Единица',
                             help_text='Единица измерения', )
@@ -59,7 +50,35 @@ class Ingredient(models.Model):
         verbose_name_plural = 'Ингредиенты'
 
     def __str__(self):
-        return self.name
+        return f'{self.name}, {self.measurement_unit}'
+
+
+class Ingredient(models.Model):
+    """Модель ингредиентов."""
+    parametrs = models.ForeignKey(
+        IngredientParam,
+        on_delete=models.CASCADE,
+        related_name='params',
+        verbose_name='Имя',
+        help_text='Имя и размерность ингредиента',
+    )
+    amount = models.IntegerField(
+        verbose_name='Количество',
+        help_text='Количество ингредиентов',
+        validators=[
+            MinValueValidator(
+                limit_value=0,
+                message='Количество ингредиентов не должно быть отрицательным.'
+                ),]
+        )
+
+    class Meta:
+        verbose_name = 'Кол-во ингредиентов'
+        verbose_name_plural = 'Кол-во ингредиентов'
+
+    def __str__(self):
+        return (f'{self.parametrs.name} - '
+                f'{self.amount} {self.parametrs.measurement_unit}')
 
 
 class Recipe(models.Model):

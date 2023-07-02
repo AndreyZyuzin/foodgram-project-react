@@ -2,7 +2,7 @@ from rest_framework import serializers
 from djoser.serializers import UserSerializer, UserCreateSerializer
 
 from users.models import CustomUser
-from recipes.models import Tag
+from recipes.models import IngredientParam, Tag
 
 
 
@@ -36,8 +36,13 @@ class CustomUserCreateSerializer(UserCreateSerializer):
         model = CustomUser
 
 
-
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Tag
+
+
+class IngredientParamSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('id', 'name', 'measurement_unit')
+        model = IngredientParam
