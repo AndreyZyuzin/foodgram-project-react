@@ -35,7 +35,7 @@ class Tag(models.Model):
         return self.name
 
 
-class IngredientParam(models.Model):
+class Ingredient(models.Model):
     """Часть модели ингредиентов."""
     name = models.CharField(max_length=200,
                             unique=True,
@@ -53,10 +53,10 @@ class IngredientParam(models.Model):
         return f'{self.name}, {self.measurement_unit}'
 
 
-class Ingredient(models.Model):
+class AmountIngredient(models.Model):
     """Модель ингредиентов."""
     parametrs = models.ForeignKey(
-        IngredientParam,
+        Ingredient,
         on_delete=models.CASCADE,
         related_name='params',
         verbose_name='Имя',
@@ -99,7 +99,7 @@ class Recipe(models.Model):
                               verbose_name='Рисунок',
                               help_text='Ссылка рисунка',)
     text = models.TextField()
-    ingredients = models.ManyToManyField(Ingredient,
+    ingredients = models.ManyToManyField(AmountIngredient,
                                          verbose_name='Ингредиент',
                                          help_text='Ингредиенты рецепта',)
     tags = models.ManyToManyField(Tag,
@@ -192,7 +192,7 @@ class Cart(models.Model):
     )
 
     ingredient = models.ForeignKey(
-        Ingredient,
+        AmountIngredient,
         on_delete=models.CASCADE,
         related_name='cart',
         verbose_name='Ингредиент',

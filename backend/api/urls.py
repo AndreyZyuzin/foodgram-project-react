@@ -1,12 +1,12 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from .views import IngredientParamViewSet, TagViewSet, CustomUserViewSet
+from .views import IngredientViewSet, TagViewSet, CustomUserViewSet
 
 
 v1_router = DefaultRouter()
 v1_router.register('tags', TagViewSet, basename='tag')
-v1_router.register('ingredients', IngredientParamViewSet, basename='ingredient')
+v1_router.register('ingredients', IngredientViewSet, basename='ingredient')
 
 customUser_list = CustomUserViewSet.as_view({
     'get': 'list',

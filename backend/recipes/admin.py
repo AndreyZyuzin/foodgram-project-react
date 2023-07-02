@@ -1,7 +1,7 @@
 from django.contrib import admin
 
-from .models import (Cart, Favorite, Ingredient, IngredientParam, Recipe,
-                     Subscription, Tag)
+from .models import (Cart, Favorite, AmountIngredient, Ingredient,
+                     Recipe, Subscription, Tag)
 
 
 class TagAdmin(admin.ModelAdmin):
@@ -10,13 +10,13 @@ class TagAdmin(admin.ModelAdmin):
     ordering = ('pk', 'name', 'slug')
 
 
-class IngredientParamAdmin(admin.ModelAdmin):
+class IngredientAdmin(admin.ModelAdmin):
     list_display = ('pk', 'name', 'measurement_unit')
     list_display_links = ('name', 'measurement_unit')
     search_fields = ('name', )
     ordering = ('pk', 'name')    
 
-class IngredientAdmin(admin.ModelAdmin):
+class AmountIngredientAdmin(admin.ModelAdmin):
     list_display = ('pk', 'get_info', 'amount',)
     list_display_links = ('pk', 'get_info')
     list_editable = ('amount',)
@@ -72,8 +72,8 @@ class CartAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Tag, TagAdmin)
-admin.site.register(IngredientParam, IngredientParamAdmin)
 admin.site.register(Ingredient, IngredientAdmin)
+admin.site.register(AmountIngredient, AmountIngredientAdmin)    # потом не нужен. после админки рецептов.
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Subscription, SubscriptionAdmin)
 admin.site.register(Favorite, FavoriteAdmin)

@@ -3,10 +3,10 @@ from rest_framework.permissions import IsAuthenticated
 from djoser.permissions import CurrentUserOrAdmin
 
 
-from recipes.models import IngredientParam, Tag
+from recipes.models import Ingredient, Tag
 from users.models import CustomUser
 from .serializers import (CustomUserCreateSerializer, CustomUserSerializer,
-                          IngredientParamSerializer, TagSerializer)
+                          IngredientSerializer, TagSerializer)
 from .pagination import CustomUsersPagination
 from .permissions import PermissionsForUsers, isAdmin
 
@@ -35,8 +35,8 @@ class TagViewSet(viewsets.ModelViewSet):
     permission_classes = (isAdmin, )
 
 
-class IngredientParamViewSet(viewsets.ModelViewSet):
-    queryset = IngredientParam.objects.all()
-    serializer_class = IngredientParamSerializer
+class IngredientViewSet(viewsets.ModelViewSet):
+    queryset = Ingredient.objects.all()
+    serializer_class = IngredientSerializer
     http_method_names = ['get']
     permission_classes = (isAdmin, )
