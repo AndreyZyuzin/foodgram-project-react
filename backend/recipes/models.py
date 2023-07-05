@@ -35,6 +35,38 @@ class Tag(models.Model):
         return self.name
 
 
+class Recipe(models.Model):
+    """Модель рецепта."""
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='recipes',
+        verbose_name='Автор',
+        help_text='Автор рецепта',
+    )
+    name = models.CharField(max_length=200,
+                            verbose_name='Название',
+                            help_text='Название рецепта', )
+    image = models.ImageField(upload_to='images/',
+                              null=True,
+                              default=None,
+                              verbose_name='Рисунок',
+                              help_text='Ссылка рисунка',)
+    text = models.TextField()
+    tags = models.ManyToManyField(Tag,
+                                  verbose_name='Тег',
+                                  help_text='Теги рецепта',)
+    cooking_time = models.IntegerField(verbose_name='Время готовки',
+                                       help_text='Время готовки в минутах', )
+
+    class Meta:
+        verbose_name = 'Рецепт'
+        verbose_name_plural = 'Рецепты'
+
+    def __str__(self):
+        return self.name
+
+
 class Ingredient(models.Model):
     """Часть модели ингредиентов."""
     name = models.CharField(max_length=200,
@@ -62,6 +94,11 @@ class AmountIngredient(models.Model):
         verbose_name='Имя',
         help_text='Имя и размерность ингредиента',
     )
+    recipe = models.ForeignKey(Recipe,
+                               on_delete=models.CASCADE,
+                               related_name='ingredients',
+                               verbose_name='Ингредиент',
+                               help_text='Ингредиенты рецепта',)
     amount = models.IntegerField(
         verbose_name='Количество',
         help_text='Количество ингредиентов',
@@ -79,41 +116,6 @@ class AmountIngredient(models.Model):
     def __str__(self):
         return (f'{self.parametrs.name} - '
                 f'{self.amount} {self.parametrs.measurement_unit}')
-
-
-class Recipe(models.Model):
-    """Модель рецепта."""
-    author = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='recipes',
-        verbose_name='Автор',
-        help_text='Автор рецепта',
-    )
-    name = models.CharField(max_length=200,
-                            verbose_name='Название',
-                            help_text='Название рецепта', )
-    image = models.ImageField(upload_to='images/',
-                              null=True,
-                              default=None,
-                              verbose_name='Рисунок',
-                              help_text='Ссылка рисунка',)
-    text = models.TextField()
-    ingredients = models.ManyToManyField(AmountIngredient,
-                                         verbose_name='Ингредиент',
-                                         help_text='Ингредиенты рецепта',)
-    tags = models.ManyToManyField(Tag,
-                                  verbose_name='Тег',
-                                  help_text='Теги рецепта',)
-    cooking_time = models.IntegerField(verbose_name='Время готовки',
-                                       help_text='Время готовки в минутах', )
-
-    class Meta:
-        verbose_name = 'Рецепт'
-        verbose_name_plural = 'Рецепты'
-
-    def __str__(self):
-        return self.name
 
 
 class Subscription(models.Model):
