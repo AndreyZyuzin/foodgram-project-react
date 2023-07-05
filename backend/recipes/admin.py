@@ -5,16 +5,17 @@ from .models import (Cart, Favorite, AmountIngredient, Ingredient,
 
 
 class TagAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'name', 'color', 'slug')
-    search_fields = ('slug', 'name')
-    ordering = ('pk', 'name', 'slug')
+    list_display = ('id', 'name', 'color', 'slug')
+    search_fields = ('slug', 'name',)
+    ordering = ('id', 'name', 'slug')
 
 
 class IngredientAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'name', 'measurement_unit')
-    list_display_links = ('name', 'measurement_unit')
+    list_display = ('id', 'name', 'measurement_unit')
+    list_display_links = ('id', 'name', 'measurement_unit')
     search_fields = ('name', )
-    ordering = ('pk', 'name')    
+    list_filter = ('measurement_unit',)
+    ordering = ('id', 'name', 'measurement_unit')
 
 
 class AmountIngredientInline(admin.TabularInline):
@@ -23,18 +24,18 @@ class AmountIngredientInline(admin.TabularInline):
 
 class RecipeAdmin(admin.ModelAdmin):
     inlines = (AmountIngredientInline, )
-    list_display = ('pk',
+    list_display = ('id',
                     'name',
-                    'image',
+                    'author',
                     'text',
                     'get_tag',
                     'get_ingredients',
                     'cooking_time',
                     )
-    list_display_links = ('pk', 'text', 'get_tag', 'get_ingredients')
+    list_display_links = ('id', 'author', 'text', 'get_tag', 'get_ingredients')
     list_editable = ('name', 'cooking_time')
-    # search_fields = ('name', 'tag__name', 'ingredient__name')
-    # ordering = ('name', 'tag__name', 'ingredient__name')
+    search_fields = ('name', )
+    list_filter = ('author', 'tags')
     # raw_id_fields = ('tags', 'ingredients')
 
     def get_tag(self, recipe):
