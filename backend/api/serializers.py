@@ -1,11 +1,14 @@
+import base64
+
 from rest_framework import serializers
 from djoser.serializers import UserSerializer, UserCreateSerializer
+from django.core.files.base import ContentFile
 
 from users.models import CustomUser
-from recipes.models import Ingredient, Tag
+from recipes.models import AmountIngredient, Ingredient, Recipe, Tag
 
-
-
+import logging
+logger = logging.getLogger(__name__)
 
 class CustomUserSerializer(UserSerializer):
     is_subscribed = serializers.SerializerMethodField()
@@ -38,11 +41,83 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
-        fields = '__all__'
         model = Tag
+        fields = '__all__'
 
 
 class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
-        fields = ('id', 'name', 'measurement_unit')
         model = Ingredient
+        fields = ('id', 'name', 'measurement_unit')
+
+class AmountIngredientSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    measurement_unit = serializers.SerializerMethodField()
+
+    class Meta:
+        fields = ('id', 'name', 'amount', 'measurement_unit')
+        model = AmountIngredient
+
+    def get_name(self, obj):
+        return obj.parametrs.name
+    
+    def get_measurement_unit(self, obj):
+        return obj.parametrs.measurement_unit
+
+
+class Base64ImageField(serializers.ImageField):
+    def to_internal_value(self, data):
+        if isinstance(data, str) and data.startswith('data:image'):
+            format, imgstr = data.split(';base64,')  
+            ext = format.split('/')[-1]  
+            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
+        return super().to_internal_value(data)
+
+
+class RecipeSerializer(serializers.ModelSerializer):
+    tags = TagSerializer(many=True,) # read_only=True)
+    # tags = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    author = CustomUserSerializer(read_only=True)
+    ingredients = AmountIngredientSerializer(many=True, read_only=True)
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
+    image = Base64ImageField(required=False, allow_null=True)
+
+    class Meta:
+        model = Recipe
+        fields = (
+            'id',
+            'tags',
+            'author',
+            'ingredients',
+            'is_favorited',
+            'is_in_shopping_cart',
+            'name',
+            'image',
+            'text',
+            'cooking_time',
+            )
+
+    def get_is_favorited(self, obj):
+        """Проверка является пользователь данный рецепт внес в желания."""
+        return True
+
+    def get_is_in_shopping_cart(self, obj):
+        """Проверка, что рецепт в корзине."""
+        logger.debug('get_is_in_shopping_cart')
+        return True
+
+
+    # def validate(self, data):
+    #     logger.debug('RecipeSerializer.validate')
+    #     return data    
+
+    def create(self, valdated_data):
+        logger.debug('RecipeSerializer.create')
+        logger.self(self)
+        tags = valdated_data.pop('tags')
+        ingredients = valdated_data.pop('ingredients')
+        recipe = Recipe.objects.create(**valdated_data)
+        for tag in tags:
+            current_tag, status = Tag.objects.get_or_create(**tag)
+            Recipe.tags.through.objects.create(tags=current_tag, recipe=recipe)
