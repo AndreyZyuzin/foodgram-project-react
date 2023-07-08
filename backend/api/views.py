@@ -43,12 +43,28 @@ class CustomUserViewSet(viewsets.ModelViewSet):
 
 class SubscriptionViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
-    # serializer_class = SubscriptionSerializer
+    serializer_class = SubscriptionSerializer
     permission_classes = (IsAuthenticated,)
     pagination_class = SubscriptionPagination
 
     @action(detail=False, methods=['GET'])
     def subscriptions(self, request):
+        """Список пользователей-последователей."""
+        logger.debug(f'!!!!!!!!!! subscriprions2 !!!!!!!!!')
+        queryset = self.filter_queryset(self.get_queryset())
+        user = request.user
+        queryset = user.follower.all()
+        page = self.paginate_queryset(queryset)
+        context = self.get_serializer_context()
+        serializer_class = self.get_serializer_class()
+        if page is None:
+            serializer = serializer_class(queryset, many=True, context=context)
+            return Response(serializer.data)
+        serializer = serializer_class(page, many=True, context=context)
+        return self.get_paginated_response(serializer.data)
+
+
+    def subscriptions2(self, request):
         """Список пользователей-последователей."""
         logger.debug(f'!!!!!!!!!! subscriprions2 !!!!!!!!!')
         user = request.user
