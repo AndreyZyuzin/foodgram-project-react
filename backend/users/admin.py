@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.conf import settings
 
 
-from .models import CustomUser
+from .models import CustomUser, Subscription
 
 
 class CustomUserAdmin(admin.ModelAdmin):
@@ -10,5 +10,11 @@ class CustomUserAdmin(admin.ModelAdmin):
     search_fields = ('username', 'email')
 
 
+class SubscriptionAdmin(admin.ModelAdmin):
+    list_display = ('id', 'author', 'following')
+    list_editable = ('author', 'following')
+    
+
 
 admin.site.register(CustomUser, CustomUserAdmin)
+admin.site.register(Subscription, SubscriptionAdmin)

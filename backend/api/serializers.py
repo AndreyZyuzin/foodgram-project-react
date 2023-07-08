@@ -4,11 +4,17 @@ from rest_framework import serializers
 from djoser.serializers import UserSerializer, UserCreateSerializer
 from django.core.files.base import ContentFile
 
-from users.models import CustomUser
-from recipes.models import AmountIngredient, Ingredient, Recipe, Tag
+from users.models import (CustomUser, Subscription)
+from recipes.models import (AmountIngredient, Ingredient, Recipe,
+                            Tag)
 
 import logging
 logger = logging.getLogger(__name__)
+
+
+
+
+
 
 class CustomUserSerializer(UserSerializer):
     is_subscribed = serializers.SerializerMethodField()
@@ -76,7 +82,6 @@ class Base64ImageField(serializers.ImageField):
 
 class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True,) # read_only=True)
-    # tags = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     author = CustomUserSerializer(read_only=True)
     ingredients = AmountIngredientSerializer(many=True, read_only=True)
     is_favorited = serializers.SerializerMethodField()
@@ -105,19 +110,60 @@ class RecipeSerializer(serializers.ModelSerializer):
     def get_is_in_shopping_cart(self, obj):
         """Проверка, что рецепт в корзине."""
         logger.debug('get_is_in_shopping_cart')
-        return True
-
-
-    # def validate(self, data):
-    #     logger.debug('RecipeSerializer.validate')
-    #     return data    
+        return True  
 
     def create(self, valdated_data):
         logger.debug('RecipeSerializer.create')
-        logger.self(self)
         tags = valdated_data.pop('tags')
         ingredients = valdated_data.pop('ingredients')
         recipe = Recipe.objects.create(**valdated_data)
         for tag in tags:
             current_tag, status = Tag.objects.get_or_create(**tag)
             Recipe.tags.through.objects.create(tags=current_tag, recipe=recipe)
+
+
+class RecipeShortSerializer(serializers.ModelSerializer):
+    image = Base64ImageField(required=False, allow_null=True)
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time',)
+
+    
+class SubscriptionSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(source="following.email")
+    id = serializers.EmailField(source="following.id")
+    username = serializers.EmailField(source="following.username")
+    first_name = serializers.EmailField(source="following.first_name")
+    last_name = serializers.EmailField(source="following.last_name")
+    is_subscribed = serializers.SerializerMethodField()
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Subscription
+        fields = ('email',
+                  'id',
+                  'username',
+                  'first_name',
+                  'last_name',
+                  'is_subscribed',
+                  'recipes',
+                  'recipes_count',
+                  )
+
+    def get_is_subscribed(self, obj):
+        return Subscription.objects.filter(
+            author=obj.following, following=obj.author).exists()
+
+    def get_recipes(self, obj):
+        logging.debug(f'get_recipes {obj}')
+        recipes = Recipe.objects.filter(author=obj.following)
+        logging.debug(f'{recipes}')
+        serializers = RecipeShortSerializer(recipes, many=True)
+        return serializers.data
+
+
+    def get_recipes_count(self,obj):
+        recipes = Recipe.objects.filter(author=obj.following)
+        return recipes.count()

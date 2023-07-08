@@ -118,35 +118,6 @@ class AmountIngredient(models.Model):
                 f'{self.amount} {self.parametrs.measurement_unit}')
 
 
-class Subscription(models.Model):
-    """Модель подписки."""
-    class Meta:
-        verbose_name = 'Подписка'
-        verbose_name_plural = 'Подписки'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['user', 'following'],
-                name='unique_following_user',
-            )
-        ]
-
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='follower',
-        verbose_name='Автор',
-        help_text='Автор',
-    )
-
-    following = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name='following',
-        verbose_name='Подписчики',
-        help_text='Подписчики',
-    )
-
-
 class Favorite(models.Model):
     """Модель избранное."""
     class Meta:
