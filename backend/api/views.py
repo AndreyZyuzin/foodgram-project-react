@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class CustomUserViewSet(viewsets.ModelViewSet):
+    queryset = CustomUser.objects.all()
     pagination_class = CustomUsersPagination
     http_method_names = ['get', 'post', 'delete']
 
@@ -44,6 +45,7 @@ class SubscriptionViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     # serializer_class = SubscriptionSerializer
     permission_classes = (IsAuthenticated,)
+    pagination_class = SubscriptionPagination
 
     @action(detail=False, methods=['GET'])
     def subscriptions(self, request):
