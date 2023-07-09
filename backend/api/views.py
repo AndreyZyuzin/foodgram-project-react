@@ -10,7 +10,7 @@ from django.shortcuts import get_object_or_404
 from recipes.models import Favorite, Ingredient, Tag, Recipe
 from users.models import CustomUser, Subscription
 from .serializers import (CustomUserCreateSerializer, CustomUserSerializer,
-                          FavoriteSerializer, IngredientSerializer,
+                          IngredientSerializer,
                           RecipeSerializer, RecipeShortSerializer,
                           TagSerializer, SubscriptionSerializer,)
 from .pagination import CustomUsersPagination, SubscriptionPagination
@@ -140,8 +140,4 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response('осталось как было')
 
 
-class FavoriteViewSet(viewsets.ModelViewSet):
-    queryset = Favorite
-    serializer_class = FavoriteSerializer
-    permission_classes = (IsAuthenticated,)
 
