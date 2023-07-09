@@ -9,10 +9,16 @@ v1_router = DefaultRouter()
 v1_router.register('tags', TagViewSet, basename='tag')
 v1_router.register('ingredients', IngredientViewSet, basename='ingredient')
 v1_router.register('recipes', RecipeViewSet, basename='recipe')
+# v1_router.register(
+#     r'recipes/(?P<recipe_id>[\d]+)/favorite',
+#     RecipeViewSet,
+#     basename='recipe'
+# )
+
 
 #v1_router.register('users', CustomUserViewSet, basename='user')
 #v1_router.register(
-#    r'users/(?P<user_id>[\d]+)/subscribe/',
+#    r'users/(?P<user_id>[\d]+)/subscribe',
 #    CustomUserViewSet,
 #    basename='subscribe'
 #)

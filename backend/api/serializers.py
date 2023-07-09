@@ -5,15 +5,11 @@ from djoser.serializers import UserSerializer, UserCreateSerializer
 from django.core.files.base import ContentFile
 
 from users.models import (CustomUser, Subscription)
-from recipes.models import (AmountIngredient, Ingredient, Recipe,
+from recipes.models import (AmountIngredient, Favorite, Ingredient, Recipe,
                             Tag)
 
 import logging
 logger = logging.getLogger(__name__)
-
-
-
-
 
 
 class CustomUserSerializer(UserSerializer):
@@ -167,3 +163,13 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     def get_recipes_count(self,obj):
         recipes = Recipe.objects.filter(author=obj.following)
         return recipes.count()
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Favorite
+        fields = ('id', 'recipe', 'user')
+
+
+
+

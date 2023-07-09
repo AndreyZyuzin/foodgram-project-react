@@ -7,12 +7,12 @@ from django.shortcuts import get_object_or_404
 
 
 
-from recipes.models import Ingredient, Tag, Recipe
+from recipes.models import Favorite, Ingredient, Tag, Recipe
 from users.models import CustomUser, Subscription
 from .serializers import (CustomUserCreateSerializer, CustomUserSerializer,
-                          IngredientSerializer, RecipeSerializer,
-                          TagSerializer,
-                          SubscriptionSerializer,)
+                          FavoriteSerializer, IngredientSerializer,
+                          RecipeSerializer, RecipeShortSerializer,
+                          TagSerializer, SubscriptionSerializer,)
 from .pagination import CustomUsersPagination, SubscriptionPagination
 from .permissions import isAuthor
 
@@ -119,4 +119,33 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         logger.debug('RecipeViewSet.perform_create')
         serializer.save(author=self.request.user)
+
+
+    @action(detail=True, methods=['POST', 'DELETE'])
+    def favorite(self, request, pk=None):
+        """Добавление и удаление рецепта pk в избранное пользователя."""
+        logger.debug(f'!!!!!!!!!! favorite !!!!!!!!!')
+        logger.debug(f'favorite:\nself:{self}\nrequest:{request}\npk:{pk}')
+        user = request.user
+        is_favorite = Favorite.objects.filter(user=user, recipe=pk).exists()
+        logger.debug(f'is_favorite: {is_favorite}')
+        if request.method == 'POST':
+            recipe = Recipe.objects.get(id=pk)
+            favorite, created = Favorite.objects.get_or_create(
+                user=user, recipe=recipe)
+            if created:
+                serializer = RecipeShortSerializer(
+                    Recipe.objects.get(id=recipe.id))
+                return Response(serializer.data)
+        if request.method == 'DELETE' and is_favorite:
+            Favorite.objects.filter(user=user, recipe=pk).delete()
+            return Response('удалено')
+            
+        return Response('осталось как было')
+
+
+class FavoriteViewSet(viewsets.ModelViewSet):
+    queryset = Favorite
+    serializer_class = FavoriteSerializer
+    permission_classes = (IsAuthenticated,)
 

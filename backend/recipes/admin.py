@@ -54,12 +54,12 @@ class RecipeAdmin(admin.ModelAdmin):
 
 
 class FavoriteAdmin(admin.ModelAdmin):
-    list_display = ('user', 'recipe')
-
+    list_display = ('id', 'user', 'recipe')
+    list_editable = ('user', 'recipe')
 
 class CartAdmin(admin.ModelAdmin):
     list_display = ('user', 'ingredient')
-
+    
 
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Ingredient, IngredientAdmin)
