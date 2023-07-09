@@ -110,14 +110,22 @@ class RecipeSerializer(serializers.ModelSerializer):
         logger.debug('get_is_in_shopping_cart')
         return True  
 
-    def create(self, valdated_data):
-        logger.debug('RecipeSerializer.create')
-        tags = valdated_data.pop('tags')
-        ingredients = valdated_data.pop('ingredients')
-        recipe = Recipe.objects.create(**valdated_data)
-        for tag in tags:
-            current_tag, status = Tag.objects.get_or_create(**tag)
-            Recipe.tags.through.objects.create(tags=current_tag, recipe=recipe)
+    def create(self, validated_data):
+        tags = validated_data.pop('tags')
+        ingredients = validated_data.pop('ingredients')
+        recipe = Recipe.objects.create(**validated_data)
+
+        for tag_id in tags:
+            tag = Tag.objects.get(id=tag_id)
+            Recipe.tags.through.objects.create(recipe=recipe, tag=tag)
+
+        for current_ingredient in ingredients:
+            current_ingredient_id = current_ingredient['id']
+            ingredient = Ingredient.objects.get(id=current_ingredient_id)
+            amount = current_ingredient['amount']
+            AmountIngredient.objects.create(
+                recipe=recipe, parametrs=ingredient, amount=amount)
+        return recipe
 
 
 class RecipeShortSerializer(serializers.ModelSerializer):
