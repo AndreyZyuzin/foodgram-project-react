@@ -6,3 +6,6 @@ class CustomUsersPagination(PageNumberPagination):
 
 class SubscriptionPagination(PageNumberPagination):
     page_size = 6
+
+class RecipesPagination(PageNumberPagination):
+    page_size = 6

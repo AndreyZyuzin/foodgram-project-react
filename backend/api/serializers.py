@@ -5,7 +5,7 @@ from djoser.serializers import UserSerializer, UserCreateSerializer
 from django.core.files.base import ContentFile
 
 from users.models import (CustomUser, Subscription)
-from recipes.models import (AmountIngredient, Ingredient, Recipe,
+from recipes.models import (AmountIngredient, Favorite, Ingredient, Recipe,
                             Tag)
 
 import logging
@@ -99,9 +99,11 @@ class RecipeSerializer(serializers.ModelSerializer):
             'cooking_time',
             )
 
-    def get_is_favorited(self, obj):
+    def get_is_favorited(self, recipe):
         """Проверка является пользователь данный рецепт внес в желания."""
-        return True
+        request = self.context.get('request')
+        user = request.user
+        return Favorite.objects.filter(user=user, recipe=recipe).exists()
 
     def get_is_in_shopping_cart(self, obj):
         """Проверка, что рецепт в корзине."""

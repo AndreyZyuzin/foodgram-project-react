@@ -13,7 +13,8 @@ from .serializers import (CustomUserCreateSerializer, CustomUserSerializer,
                           IngredientSerializer,
                           RecipeSerializer, RecipeShortSerializer,
                           TagSerializer, SubscriptionSerializer,)
-from .pagination import CustomUsersPagination, SubscriptionPagination
+from .pagination import (CustomUsersPagination, SubscriptionPagination,
+                         RecipesPagination)
 from .permissions import isAuthor
 
 
@@ -111,6 +112,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = (IsAuthenticated,)
+    pagination_class = RecipesPagination
 
     def perform_create(self, serializer):
         logger.debug('RecipeViewSet.perform_create')
