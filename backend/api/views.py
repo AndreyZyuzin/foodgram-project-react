@@ -76,14 +76,10 @@ class SubscriptionViewSet(viewsets.ModelViewSet):
     def subscribe(self, request, user_id):
         logger.debug(f'!!!!!!!!!! subscriprions3 !!!!!!!!!')
         author = request.user
-        user_id = self.kwargs.get('user_id')
         is_subscription = Subscription.objects.filter(
             author=author, following__id=user_id).exists()
-        logger.debug(f'::{is_subscription}')
-        logger.debug(f'::{author.id}, {user_id}')
         if request.method=='POST' and not is_subscription:
             user = CustomUser.objects.get(pk=user_id)
-            logger.debug(f'::{user_id}!!!!!!!!!!!!!!!')
             subscription = Subscription.objects.create(
                 author=author, following=user)
             logger.debug(f'id::{id}')
@@ -91,7 +87,7 @@ class SubscriptionViewSet(viewsets.ModelViewSet):
                 Subscription.objects.get(id=subscription.id))
             return Response(serializer.data)
         if request.method=='DELETE' and is_subscription:
-            Subscription.objects.filter(
+            Subscription.objects.get(
                 author=author, following__id=user_id).delete()
             return Response()
         return Response('Подписка осталось как было')
@@ -138,7 +134,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     Recipe.objects.get(id=recipe.id))
                 return Response(serializer.data)
         if request.method == 'DELETE' and is_favorite:
-            Favorite.objects.filter(user=user, recipe=pk).delete()
+            Favorite.objects.get(user=user, recipe=pk).delete()
             return Response('удалено')
             
         return Response('осталось как было')
