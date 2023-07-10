@@ -152,8 +152,8 @@ class Cart(models.Model):
         verbose_name_plural = 'Корзина'
         constraints = [
             models.UniqueConstraint(
-                fields=['user', 'ingredient'],
-                name='unique_user_ingredient',
+                fields=['user', 'recipe'],
+                name='unique_cart_user_recipe',
             )
         ]
 
@@ -164,9 +164,9 @@ class Cart(models.Model):
         verbose_name='Пользователь',
     )
 
-    ingredient = models.ForeignKey(
-        AmountIngredient,
+    recipe = models.ForeignKey(
+        Recipe,
         on_delete=models.CASCADE,
         related_name='cart',
-        verbose_name='Ингредиент',
+        verbose_name='Рецепт',
     )
