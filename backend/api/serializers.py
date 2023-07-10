@@ -77,7 +77,7 @@ class Base64ImageField(serializers.ImageField):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    tags = TagSerializer(many=True,) # read_only=True)
+    tags = TagSerializer(many=True,)
     author = CustomUserSerializer(read_only=True)
     ingredients = AmountIngredientSerializer(many=True, read_only=True)
     is_favorited = serializers.SerializerMethodField()
@@ -126,6 +126,63 @@ class RecipeSerializer(serializers.ModelSerializer):
             AmountIngredient.objects.create(
                 recipe=recipe, parametrs=ingredient, amount=amount)
         return recipe
+
+    def update(self, instance: Recipe, validated_data): 
+        # logger.debug(f'self: {self}')
+        logger.debug(f'instance: {instance}')
+        logger.debug(f'instance.tags: {instance.tags.all().values()}')
+        logger.debug(f'instance.ingredients: {instance.ingredients.all().values()}')
+        logger.debug(f'validated_data: {validated_data}')
+        
+        if 'tags' in validated_data:
+            new_tags_ids = validated_data.pop('tags')
+            old_tags = instance.tags.all()
+
+            for current_tag in old_tags:
+                if current_tag.id not in new_tags_ids:
+                    instance.tags.through.objects.get(
+                        recipe=instance, tag=current_tag
+                        ).delete()
+
+            for tag_id in new_tags_ids:
+                tag = Tag.objects.get(id=tag_id)
+                instance.tags.through.objects.update_or_create(
+                    recipe=instance, tag=tag)
+                
+        if 'ingredients' in validated_data:
+            new_ingredients = validated_data.pop('ingredients')
+            old_ingredients = instance.ingredients.all()
+
+            for ingredient in old_ingredients:
+                logger.debug(f'ingredient: {ingredient} {type(ingredient)}')
+                
+                AmountIngredient.objects.get(
+                    recipe=instance, parametrs=ingredient.parametrs
+                    ).delete()
+
+            for current_ingredient in new_ingredients:
+                ingredient = Ingredient.objects.get(
+                    id=current_ingredient['id'])
+                AmountIngredient.objects.update_or_create(
+                    recipe=instance, parametrs=ingredient,
+                    defaults={'amount': current_ingredient['amount']}
+                )
+
+        instance.name = validated_data.get('name', instance.name)
+        instance.image = validated_data.get('image', instance.image)
+        instance.text = validated_data.get('text', instance.text)
+        instance.cooking_time = validated_data.get('cooking_time',
+                                                   instance.cooking_time)
+
+        instance.save()
+
+        return instance
+
+
+    def to_internal_value(self, data):
+        logger.debug('to_internal_value')
+        return data
+
 
 
 class RecipeShortSerializer(serializers.ModelSerializer):
