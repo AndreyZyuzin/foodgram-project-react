@@ -78,7 +78,7 @@ class Base64ImageField(serializers.ImageField):
 
 class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True,)
-    author = CustomUserSerializer(read_only=True)
+    author = CustomUserSerializer(read_only=True, source='user')
     ingredients = AmountIngredientSerializer(many=True, read_only=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
@@ -103,6 +103,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         """Проверка является пользователь данный рецепт внес в желания."""
         request = self.context.get('request')
         user = request.user
+        if not user.is_authenticated:
+            return False
         return Favorite.objects.filter(user=user, recipe=recipe).exists()
 
     def get_is_in_shopping_cart(self, obj):
@@ -111,6 +113,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         return True  
 
     def create(self, validated_data):
+        logger.debug(f'validated_data: {validated_data}')
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredients')
         recipe = Recipe.objects.create(**validated_data)
@@ -217,18 +220,18 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         return Subscription.objects.filter(
-            author=obj.following, following=obj.author).exists()
+            user=obj.following, following=obj.user).exists()
 
     def get_recipes(self, obj):
         logging.debug(f'get_recipes {obj}')
-        recipes = Recipe.objects.filter(author=obj.following)
+        recipes = Recipe.objects.filter(user=obj.following)
         logging.debug(f'{recipes}')
         serializers = RecipeShortSerializer(recipes, many=True)
         return serializers.data
 
 
     def get_recipes_count(self,obj):
-        recipes = Recipe.objects.filter(author=obj.following)
+        recipes = Recipe.objects.filter(user=obj.following)
         return recipes.count()
 
 

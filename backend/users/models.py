@@ -44,12 +44,12 @@ class Subscription(models.Model):
         verbose_name_plural = 'Подписки'
         constraints = [
             models.UniqueConstraint(
-                fields=['author', 'following'],
+                fields=['user', 'following'],
                 name='unique_following_author',
             )
         ]
 
-    author = models.ForeignKey(
+    user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='follower',
@@ -66,7 +66,7 @@ class Subscription(models.Model):
     )
 
     def __str__(self):
-        return f'{self.following} подписан на {self.author}'
+        return f'{self.following} подписан на {self.user}'
 
     def clean(self):
         if self.following.pk == self.author.pk:

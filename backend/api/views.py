@@ -1,7 +1,8 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
+from rest_framework.permissions import (AllowAny, IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly, IsAdminUser)
 from djoser.permissions import CurrentUserOrAdmin
 from django.shortcuts import get_object_or_404
 
@@ -15,7 +16,7 @@ from .serializers import (CustomUserCreateSerializer, CustomUserSerializer,
                           TagSerializer, SubscriptionSerializer,)
 from .pagination import (CustomUsersPagination, SubscriptionPagination,
                          RecipesPagination)
-from .permissions import isAuthor
+from .permissions import isAuthor, isAuthorOrReadOnly
 
 
 import logging
@@ -78,18 +79,18 @@ class SubscriptionViewSet(viewsets.ModelViewSet):
         logger.debug(f'!!!!!!!!!! subscriprions3 !!!!!!!!!')
         author = request.user
         is_subscription = Subscription.objects.filter(
-            author=author, following__id=user_id).exists()
+            user=author, following__id=user_id).exists()
         if request.method=='POST' and not is_subscription:
             user = CustomUser.objects.get(pk=user_id)
             subscription = Subscription.objects.create(
-                author=author, following=user)
+                user=author, following=user)
             logger.debug(f'id::{id}')
             serializer = SubscriptionSerializer(
                 Subscription.objects.get(id=subscription.id))
             return Response(serializer.data)
         if request.method=='DELETE' and is_subscription:
             Subscription.objects.get(
-                author=author, following__id=user_id).delete()
+                user=author, following__id=user_id).delete()
             return Response()
         return Response('Подписка осталось как было')
         
@@ -98,25 +99,25 @@ class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     http_method_names = ['get']
-    permission_classes = (IsAdminUser, )
+    permission_classes = (AllowAny, )
 
 
 class IngredientViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     http_method_names = ['get']
-    permission_classes = (IsAdminUser, )
+    permission_classes = (AllowAny, )
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (isAuthorOrReadOnly,)
     pagination_class = RecipesPagination
 
+
     def perform_create(self, serializer):
-        logger.debug('RecipeViewSet.perform_create')
-        serializer.save(author=self.request.user)
+        serializer.save(user=self.request.user)
 
 
     @action(detail=True, methods=['POST', 'DELETE'])

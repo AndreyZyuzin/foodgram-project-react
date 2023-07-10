@@ -11,8 +11,8 @@ class CustomUserAdmin(admin.ModelAdmin):
 
 
 class SubscriptionAdmin(admin.ModelAdmin):
-    list_display = ('id', 'author', 'following')
-    list_editable = ('author', 'following')
+    list_display = ('id', 'user', 'following')
+    list_editable = ('user', 'following')
     
 
 

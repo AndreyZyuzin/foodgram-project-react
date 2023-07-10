@@ -26,16 +26,16 @@ class RecipeAdmin(admin.ModelAdmin):
     inlines = (AmountIngredientInline, )
     list_display = ('id',
                     'name',
-                    'author',
+                    'user',
                     'text',
                     'get_tag',
                     'get_ingredients',
                     'cooking_time',
                     )
-    list_display_links = ('id', 'author', 'text', 'get_tag', 'get_ingredients')
+    list_display_links = ('id', 'user', 'text', 'get_tag', 'get_ingredients')
     list_editable = ('name', 'cooking_time')
     search_fields = ('name', )
-    list_filter = ('author', 'tags')
+    list_filter = ('user', 'tags')
     # raw_id_fields = ('tags', 'ingredients')
 
     def get_tag(self, recipe):
