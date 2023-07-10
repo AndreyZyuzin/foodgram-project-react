@@ -120,7 +120,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
-    @action(detail=True, methods=['POST', 'DELETE'])
+    @action(detail=True,
+            methods=['POST', 'DELETE'],
+            permission_classes=(IsAuthenticated,))
     def favorite(self, request, pk=None):
         """Добавление и удаление рецепта pk в избранное пользователя."""
         logger.debug(f'!!!!!!!!!! favorite !!!!!!!!!')
@@ -138,7 +140,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 return Response(serializer.data)
         if request.method == 'DELETE' and is_favorite:
             Favorite.objects.get(user=user, recipe=pk).delete()
-            return Response('удалено')
+            return Response()
             
         return Response('осталось как было')
 
