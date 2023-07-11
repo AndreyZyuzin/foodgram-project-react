@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404
 
 
 
-from recipes.models import Favorite, Ingredient, Tag, Recipe
+from recipes.models import Cart, Favorite, Ingredient, Tag, Recipe
 from users.models import CustomUser, Subscription
 from .serializers import (CustomUserCreateSerializer, CustomUserSerializer,
                           IngredientSerializer,
@@ -145,4 +145,54 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response('осталось как было')
 
 
+    @action(detail=True,
+            methods=['POST', 'DELETE'],
+            permission_classes=(IsAuthenticated,))
+    def shopping_cart(self, request, pk=None):
+        """Добавление и удаление рецепта pk в корзину."""
+        logger.debug(f'!!!!!!!!!! shopping_cart !!!!!!!!!')
+        logger.debug(f'favorite:\nself:{self}\nrequest:{request}\npk:{pk}')
+        user = request.user
+        is_cart = Cart.objects.filter(user=user, recipe=pk).exists()
+        logger.debug(f'is_cart: {is_cart}')
+        if request.method == 'POST':
+            recipe = Recipe.objects.get(id=pk)
+            cart, created = Cart.objects.get_or_create(
+                user=user, recipe=recipe)
+            if created:
+                serializer = RecipeShortSerializer(
+                    Recipe.objects.get(id=recipe.id))
+                return Response(serializer.data)
+        if request.method == 'DELETE' and is_cart:
+            Cart.objects.get(user=user, recipe=pk).delete()
+            return Response(f'{user} удаление рецепта из корзины')
+            
+        return Response(f'{user} осталось как было')
 
+    @action(detail=False,
+            methods=['GET'],
+            permission_classes=(IsAuthenticated,))
+    def download_shopping_cart(self, request):
+        """Загрузить файл корзины."""
+        from django.db.models import Count, Sum
+        user = request.user
+        recipes = user.cart.all()
+        for recipe in recipes:
+            logging.debug(f'recipe: {recipe.recipe.ingredients.values()}')
+        # annotated_results = user.cart.annotation(ingredient_sum = Count(recipe.ingredients))
+        logging.debug(f'1: {recipes}')
+        logging.debug(f"2: {recipes.values('recipe_id').annotate(Count('recipe__ingredients__parametrs'))}")
+        logging.debug(f"3: {recipes.values('recipe_id').annotate(Sum('recipe__ingredients__amount'))}")
+        logging.debug(f"4: {recipes.values('recipe_id').annotate()}")
+
+        
+        
+        
+        
+        
+        import io
+        from django.http import FileResponse
+        response = FileResponse(io.BytesIO(b'binary content'),
+                             as_attachment=True)
+        return response
+        return Response(f'{request.user} Идет загрузка файла.')
