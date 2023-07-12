@@ -169,6 +169,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             
         return Response(f'{user} осталось как было')
 
+
     @action(detail=False,
             methods=['GET'],
             permission_classes=(IsAuthenticated,))
@@ -184,6 +185,30 @@ class RecipeViewSet(viewsets.ModelViewSet):
         logging.debug(f"2: {recipes.values('recipe_id').annotate(Count('recipe__ingredients__parametrs'))}")
         logging.debug(f"3: {recipes.values('recipe_id').annotate(Sum('recipe__ingredients__amount'))}")
         logging.debug(f"4: {recipes.values('recipe_id').annotate()}")
+        
+        result = {}
+        for recipe in recipes:
+            ingredient = recipe.recipe.ingredients.values('parametrs_id',
+                                                          'amount')
+            logging.debug(f'tmp: {ingredient}')
+            for item in ingredient:
+                parametrs_id, amount = item['parametrs_id'], item['amount']
+                if parametrs_id in result:
+                    result[parametrs_id] += amount
+                else:
+                    result[parametrs_id] = amount
+        logging.debug(f'result: {result}')
+
+        ingredients = []
+        for parametrs_id, amount in result.items():
+            name, unit = 0,0
+            ing = Ingredient.objects.get(id=parametrs_id)
+            logging.debug(f'name, unit: {name}, {unit}')
+            logging.debug(f'ing: {ing}, {ing.name}, {ing.measurement_unit}')
+            ingredient = {'amount': amount}
+            ingredients.append(ingredient)
+        logging.debug(f'ingredients: {ingredients}')
+        
 
         
         

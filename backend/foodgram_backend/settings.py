@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'api.apps.ApiConfig',
     'recipes.apps.RecipesConfig',
+#    'shoping_cart.apps.ShopingCartConfig',
     'core.apps.CoreConfig',
 ]
 
