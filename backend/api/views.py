@@ -1,3 +1,5 @@
+import io
+
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -5,6 +7,7 @@ from rest_framework.permissions import (AllowAny, IsAuthenticated,
                                         IsAuthenticatedOrReadOnly, IsAdminUser)
 from djoser.permissions import CurrentUserOrAdmin
 from django.shortcuts import get_object_or_404
+from django.http import FileResponse
 
 
 
@@ -17,6 +20,7 @@ from .serializers import (CustomUserCreateSerializer, CustomUserSerializer,
 from .pagination import (CustomUsersPagination, SubscriptionPagination,
                          RecipesPagination)
 from .permissions import isAuthor, isAuthorOrReadOnly
+from core.utilites.pdf import PDF
 
 
 import logging
@@ -201,23 +205,17 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         ingredients = []
         for parametrs_id, amount in result.items():
-            name, unit = 0,0
-            ing = Ingredient.objects.get(id=parametrs_id)
-            logging.debug(f'name, unit: {name}, {unit}')
-            logging.debug(f'ing: {ing}, {ing.name}, {ing.measurement_unit}')
-            ingredient = {'amount': amount}
-            ingredients.append(ingredient)
-        logging.debug(f'ingredients: {ingredients}')
+            ingredient = Ingredient.objects.get(id=parametrs_id)
+            logging.debug(f'ingredient: {ingredient}, {ingredient.name}, {ingredient.measurement_unit}')
+            current_ingredient = {'name': ingredient.name,
+                                  'amount': amount,
+                                  'unit': ingredient.measurement_unit}
+            ingredients.append(current_ingredient)
+        logging.debug(f'ingredients: {ingredients}, {type(ingredients)}')
         
-
-        
-        
-        
-        
-        
-        import io
-        from django.http import FileResponse
-        response = FileResponse(io.BytesIO(b'binary content'),
-                             as_attachment=True)
+        file_pdf = PDF().creaete_list_ingredients(ingredients,)
+        response = FileResponse(io.BytesIO(file_pdf),
+                                as_attachment=True,
+                                filename="ingredients.pdf")
         return response
-        return Response(f'{request.user} Идет загрузка файла.')
+
