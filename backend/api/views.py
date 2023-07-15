@@ -8,7 +8,7 @@ from rest_framework.permissions import (AllowAny, IsAuthenticated,
 from djoser.permissions import CurrentUserOrAdmin
 from django.shortcuts import get_object_or_404
 from django.http import FileResponse
-
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 from recipes.models import Cart, Favorite, Ingredient, Tag, Recipe
@@ -21,6 +21,8 @@ from .pagination import (CustomUsersPagination, SubscriptionPagination,
                          RecipesPagination)
 from .permissions import isAuthor, isAuthorOrReadOnly
 from core.utilites.pdf import PDF
+from api.filters import RecipeFilter
+
 
 
 import logging
@@ -117,6 +119,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeSerializer
     permission_classes = (isAuthorOrReadOnly,)
     pagination_class = RecipesPagination
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = RecipeFilter
 
     def perform_create(self, serializer):
         logger.debug(f'perform_create: {self}')
