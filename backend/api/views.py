@@ -56,10 +56,9 @@ class SubscriptionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['GET'])
     def subscriptions(self, request):
         """Список пользователей-последователей."""
-        logger.debug(f'!!!!!!!!!! subscriprions2 !!!!!!!!!')
         queryset = self.filter_queryset(self.get_queryset())
         user = request.user
-        queryset = user.follower.all()
+        queryset = user.following.all()
         page = self.paginate_queryset(queryset)
         context = self.get_serializer_context()
         serializer_class = self.get_serializer_class()
@@ -79,22 +78,20 @@ class SubscriptionViewSet(viewsets.ModelViewSet):
 
 
     @action(detail=True, methods=['POST', 'DELETE'])
-    def subscribe(self, request, user_id):
-        logger.debug(f'!!!!!!!!!! subscriprions3 !!!!!!!!!')
-        author = request.user
+    def subscribe(self, request, author_id):
+        user = request.user
+        author = CustomUser.objects.get(pk=author_id)
         is_subscription = Subscription.objects.filter(
-            user=author, following__id=user_id).exists()
+            user=author, following=user).exists()
         if request.method=='POST' and not is_subscription:
-            user = CustomUser.objects.get(pk=user_id)
             subscription = Subscription.objects.create(
                 user=author, following=user)
-            logger.debug(f'id::{id}')
             serializer = SubscriptionSerializer(
                 Subscription.objects.get(id=subscription.id))
             return Response(serializer.data)
-        if request.method=='DELETE' and is_subscription:
+        if request.method=='DELETE' and not is_subscription:
             Subscription.objects.get(
-                user=author, following__id=user_id).delete()
+                user=author, following=user).delete()
             return Response()
         return Response('Подписка осталось как было')
         
@@ -113,14 +110,16 @@ class IngredientViewSet(viewsets.ModelViewSet):
     permission_classes = (AllowAny, )
 
 
+#  Доступна фильтрация по избранному, автору, списку покупок и тегам.
+
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all().order_by('-pub_date')
     serializer_class = RecipeSerializer
     permission_classes = (isAuthorOrReadOnly,)
     pagination_class = RecipesPagination
 
-
     def perform_create(self, serializer):
+        logger.debug(f'perform_create: {self}')
         serializer.save(user=self.request.user)
 
 
@@ -142,7 +141,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 serializer = RecipeShortSerializer(
                     Recipe.objects.get(id=recipe.id))
                 return Response(serializer.data)
-        if request.method == 'DELETE' and is_favorite:
+        if request.method == 'DELETE' and not is_favorite:
             Favorite.objects.get(user=user, recipe=pk).delete()
             return Response()
             
@@ -167,7 +166,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 serializer = RecipeShortSerializer(
                     Recipe.objects.get(id=recipe.id))
                 return Response(serializer.data)
-        if request.method == 'DELETE' and is_cart:
+        if request.method == 'DELETE' and not is_cart:
             Cart.objects.get(user=user, recipe=pk).delete()
             return Response(f'{user} удаление рецепта из корзины')
             
@@ -212,10 +211,42 @@ class RecipeViewSet(viewsets.ModelViewSet):
                                   'unit': ingredient.measurement_unit}
             ingredients.append(current_ingredient)
         logging.debug(f'ingredients: {ingredients}, {type(ingredients)}')
-        
+
         file_pdf = PDF().creaete_list_ingredients(ingredients,)
         response = FileResponse(io.BytesIO(file_pdf),
                                 as_attachment=True,
                                 filename="ingredients.pdf")
         return response
 
+
+
+
+    @action(detail=False,
+            methods=['GET'],
+            permission_classes=(IsAuthenticated,))
+    def download_shopping_cart2(self, request):
+        """Загрузить файл корзины."""
+        from django.db.models import Count, Sum
+        user = request.user
+        recipes = user.cart.all()
+        for recipe in recipes:
+            logging.debug(f'recipe: {recipe.recipe.ingredients.values()}')
+        # annotated_results = user.cart.annotation(ingredient_sum = Count(recipe.ingredients))
+        logging.debug(f'1: {recipes}')
+#        logging.debug(f"2: {recipes.values('recipe_id').annotate(Count('recipe__ingredients__parametrs'))}")
+#        logging.debug(f"3: {recipes.values('recipe_id').annotate(Sum('recipe__ingredients__amount'))}")
+        logging.debug(f"5: {recipes.values('recipe__ingredients__parametrs')}")
+        res = (recipes.annotate(Count('recipe__ingredients__parametrs')))
+        logging.debug(f"6: {Recipe.cart__set.filter(user_id=2)}")
+        
+
+
+
+        
+        return Response()
+    
+        file_pdf = PDF().creaete_list_ingredients(ingredients,)
+        response = FileResponse(io.BytesIO(file_pdf),
+                                as_attachment=True,
+                                filename="ingredients.pdf")
+        return response

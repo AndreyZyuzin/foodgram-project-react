@@ -1,3 +1,4 @@
+import os
 
 from fpdf import FPDF
 from django.conf import settings

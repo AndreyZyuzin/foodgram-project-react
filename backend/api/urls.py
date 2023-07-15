@@ -34,7 +34,9 @@ customUser_action = SubscriptionViewSet.as_view({
 urlpatterns = [
     path('users/', customUser_list, name='users-list'),
     path('users/subscriptions/', customUser_action),
-    path('users/<int:user_id>/subscribe/', customUser_action),
+    path('users/<int:author_id>/subscribe/', customUser_action),
     path('', include(v1_router.urls)),
     path('', include('users.urls')),
 ]
+from django.conf import settings
+from django.conf.urls.static import static
