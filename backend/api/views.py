@@ -166,7 +166,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 serializer = RecipeShortSerializer(
                     Recipe.objects.get(id=recipe.id))
                 return Response(serializer.data)
-        if request.method == 'DELETE' and not is_cart:
+        if request.method == 'DELETE' and is_cart:
             Cart.objects.get(user=user, recipe=pk).delete()
             return Response(f'{user} удаление рецепта из корзины')
             

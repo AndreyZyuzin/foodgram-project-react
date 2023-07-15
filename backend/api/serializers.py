@@ -28,7 +28,10 @@ class CustomUserSerializer(UserSerializer):
     def get_is_subscribed(self, obj):
         """Проверка является пользователь подписчиком автора."""
         request = self.context.get('request')
+        logger.debug(f'get_is_subscibed: {request.user}')
         user = request.user
+        if user.is_anonymous:
+            return False
         return Subscription.objects.filter(user=obj, following=user).exists()
 
 
@@ -110,17 +113,16 @@ class RecipeSerializer(serializers.ModelSerializer):
         """Проверка является пользователь данный рецепт внес в желания."""
         request = self.context.get('request')
         user = request.user
-        if not user.is_authenticated:
+        if user.is_anonymous:
             return False
         return Favorite.objects.filter(user=user, recipe=recipe).exists()
 
     def get_is_in_shopping_cart(self, obj):
         """Проверка, что рецепт в корзине."""
-        logger.debug('get_is_in_shopping_cart')
-        logger.debug(f'self: {self}')
-        logger.debug(f'obj: {obj}')
         request = self.context.get('request')
         user = request.user
+        if user.is_anonymous:
+            return False
         return Cart.objects.filter(user=user, recipe=obj).exists()
 
     def create(self, validated_data):
