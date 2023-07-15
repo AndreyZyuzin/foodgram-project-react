@@ -185,6 +185,38 @@ class RecipeViewSet(viewsets.ModelViewSet):
             logging.debug(f'recipe: {recipe.recipe.ingredients.values()}')
         # annotated_results = user.cart.annotation(ingredient_sum = Count(recipe.ingredients))
         logging.debug(f'1: {recipes}')
+        logging.debug(f"8: {recipes.values('recipe__ingredients__parametrs').annotate(Sum('recipe__ingredients__amount'))}")
+        result = (recipes.values(
+            'recipe__ingredients__parametrs__name',
+            'recipe__ingredients__parametrs__measurement_unit'
+            ).annotate(amount=Sum('recipe__ingredients__amount')))
+        logger.debug(result)
+        ingredients = [
+            {'name': item['recipe__ingredients__parametrs__name'],
+             'amount': item['amount'],
+             'unit': item['recipe__ingredients__parametrs__measurement_unit']
+             } for item in result]
+        logger.debug(ingredients)
+
+        file_pdf = PDF().creaete_list_ingredients(ingredients,)
+        response = FileResponse(io.BytesIO(file_pdf),
+                                as_attachment=True,
+                                filename="ingredients.pdf")
+        return response
+
+
+    @action(detail=False,
+            methods=['GET'],
+            permission_classes=(IsAuthenticated,))
+    def download_shopping_cart2(self, request):
+        """Загрузить файл корзины."""
+        from django.db.models import Count, Sum
+        user = request.user
+        recipes = user.cart.all()
+        for recipe in recipes:
+            logging.debug(f'recipe: {recipe.recipe.ingredients.values()}')
+        # annotated_results = user.cart.annotation(ingredient_sum = Count(recipe.ingredients))
+        logging.debug(f'1: {recipes}')
         logging.debug(f"2: {recipes.values('recipe_id').annotate(Count('recipe__ingredients__parametrs'))}")
         logging.debug(f"3: {recipes.values('recipe_id').annotate(Sum('recipe__ingredients__amount'))}")
         logging.debug(f"4: {recipes.values('recipe_id').annotate()}")
@@ -218,35 +250,3 @@ class RecipeViewSet(viewsets.ModelViewSet):
                                 filename="ingredients.pdf")
         return response
 
-
-
-
-    @action(detail=False,
-            methods=['GET'],
-            permission_classes=(IsAuthenticated,))
-    def download_shopping_cart2(self, request):
-        """Загрузить файл корзины."""
-        from django.db.models import Count, Sum
-        user = request.user
-        recipes = user.cart.all()
-        for recipe in recipes:
-            logging.debug(f'recipe: {recipe.recipe.ingredients.values()}')
-        # annotated_results = user.cart.annotation(ingredient_sum = Count(recipe.ingredients))
-        logging.debug(f'1: {recipes}')
-#        logging.debug(f"2: {recipes.values('recipe_id').annotate(Count('recipe__ingredients__parametrs'))}")
-#        logging.debug(f"3: {recipes.values('recipe_id').annotate(Sum('recipe__ingredients__amount'))}")
-        logging.debug(f"5: {recipes.values('recipe__ingredients__parametrs')}")
-        res = (recipes.annotate(Count('recipe__ingredients__parametrs')))
-        logging.debug(f"6: {Recipe.cart__set.filter(user_id=2)}")
-        
-
-
-
-        
-        return Response()
-    
-        file_pdf = PDF().creaete_list_ingredients(ingredients,)
-        response = FileResponse(io.BytesIO(file_pdf),
-                                as_attachment=True,
-                                filename="ingredients.pdf")
-        return response
