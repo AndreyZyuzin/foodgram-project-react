@@ -5,7 +5,8 @@ from djoser.serializers import UserSerializer, UserCreateSerializer
 from django.core.files.base import ContentFile
 
 from users.models import (CustomUser, Subscription)
-from recipes.models import AmountIngredient, Favorite, Ingredient, Recipe, Tag
+from recipes.models import (AmountIngredient, Cart, Favorite, Ingredient,
+                            Recipe, Tag)
 
 import logging
 logger = logging.getLogger(__name__)
@@ -116,7 +117,11 @@ class RecipeSerializer(serializers.ModelSerializer):
     def get_is_in_shopping_cart(self, obj):
         """Проверка, что рецепт в корзине."""
         logger.debug('get_is_in_shopping_cart')
-        return True  
+        logger.debug(f'self: {self}')
+        logger.debug(f'obj: {obj}')
+        request = self.context.get('request')
+        user = request.user
+        return Cart.objects.filter(user=user, recipe=obj).exists()
 
     def create(self, validated_data):
         logger.debug(f'validated_data: {validated_data}')
@@ -144,12 +149,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, instance: Recipe, validated_data): 
-        # logger.debug(f'self: {self}')
-        logger.debug(f'instance: {instance}')
-        logger.debug(f'instance.tags: {instance.tags.all().values()}')
-        logger.debug(f'instance.ingredients: {instance.ingredients.all().values()}')
-        logger.debug(f'validated_data: {validated_data}')
-        
         if 'tags' in validated_data:
             new_tags_ids = validated_data.pop('tags')
             old_tags = instance.tags.all()
