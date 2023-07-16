@@ -56,7 +56,8 @@ class Recipe(models.Model):
     text = models.TextField()
     tags = models.ManyToManyField(Tag,
                                   verbose_name='Тег',
-                                  help_text='Теги рецепта',)
+                                  help_text='Теги рецепта',
+                                  db_index=True)
     cooking_time = models.IntegerField(verbose_name='Время готовки',
                                        help_text='Время готовки в минутах', )
     pub_date = models.DateTimeField(
@@ -80,7 +81,8 @@ class Ingredient(models.Model):
     name = models.CharField(max_length=200,
                             unique=True,
                             verbose_name='Название',
-                            help_text='Название ингредиента', )
+                            help_text='Название ингредиента', 
+                            db_index=True,)
     measurement_unit = models.CharField(max_length=40,
                             verbose_name='Единица',
                             help_text='Единица измерения', )

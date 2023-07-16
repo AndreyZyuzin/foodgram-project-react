@@ -9,6 +9,7 @@ from djoser.permissions import CurrentUserOrAdmin
 from django.shortcuts import get_object_or_404
 from django.http import FileResponse
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
 
 
 from recipes.models import Cart, Favorite, Ingredient, Tag, Recipe
@@ -21,7 +22,7 @@ from .pagination import (CustomUsersPagination, SubscriptionPagination,
                          RecipesPagination)
 from .permissions import isAuthor, isAuthorOrReadOnly
 from core.utilites.pdf import PDF
-from api.filters import RecipeFilter
+from api.filters import IngredientFilter, RecipeFilter
 
 
 
@@ -110,6 +111,8 @@ class IngredientViewSet(viewsets.ModelViewSet):
     serializer_class = IngredientSerializer
     http_method_names = ['get']
     permission_classes = (AllowAny, )
+    filter_backends = (DjangoFilterBackend, )
+    filterset_class = IngredientFilter
 
 
 #  Доступна фильтрация по избранному, автору, списку покупок и тегам.
@@ -123,7 +126,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filterset_class = RecipeFilter
 
     def perform_create(self, serializer):
-        logger.debug(f'perform_create: {self}')
         serializer.save(user=self.request.user)
 
 

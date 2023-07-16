@@ -38,5 +38,3 @@ urlpatterns = [
     path('', include(v1_router.urls)),
     path('', include('users.urls')),
 ]
-from django.conf import settings
-from django.conf.urls.static import static
