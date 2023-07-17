@@ -20,8 +20,8 @@ class Tag(models.Model):
             RegexValidator(
                 regex='^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$',
                 message='должен быть цвет в виде #fff или #ffffff',
-                ), ],
-        )
+            ), ],
+    )
     slug = models.SlugField(max_length=200,
                             unique=True,
                             verbose_name='Уникальная строка-индификатор',
@@ -115,8 +115,8 @@ class AmountIngredient(models.Model):
             MinValueValidator(
                 limit_value=0,
                 message='Количество ингредиентов не должно быть отрицательным.'
-                ), ]
-        )
+            ), ]
+    )
 
     class Meta:
         verbose_name = 'Кол-во ингредиентов'

@@ -103,7 +103,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             'image',
             'text',
             'cooking_time',
-            )
+        )
 
     def get_is_favorited(self, recipe):
         """Проверка является пользователь данный рецепт внес в желания."""
@@ -153,7 +153,7 @@ class RecipeSerializer(serializers.ModelSerializer):
                 if current_tag.id not in new_tags_ids:
                     instance.tags.through.objects.get(
                         recipe=instance, tag=current_tag
-                        ).delete()
+                    ).delete()
 
             for tag_id in new_tags_ids:
                 tag = Tag.objects.get(id=tag_id)
@@ -167,7 +167,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             for ingredient in old_ingredients:
                 AmountIngredient.objects.get(
                     recipe=instance, parametrs=ingredient.parametrs
-                    ).delete()
+                ).delete()
 
             for current_ingredient in new_ingredients:
                 ingredient = Ingredient.objects.get(
