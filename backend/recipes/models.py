@@ -1,6 +1,6 @@
-from django.db import models
-from django.core.validators import RegexValidator, MinValueValidator
 from django.conf import settings
+from django.core.validators import MinValueValidator, RegexValidator
+from django.db import models
 from django.utils import timezone
 
 
@@ -20,7 +20,7 @@ class Tag(models.Model):
             RegexValidator(
                 regex='^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$',
                 message='должен быть цвет в виде #fff или #ffffff',
-                ),],
+                ), ],
         )
     slug = models.SlugField(max_length=200,
                             unique=True,
@@ -61,7 +61,6 @@ class Recipe(models.Model):
     cooking_time = models.IntegerField(verbose_name='Время готовки',
                                        help_text='Время готовки в минутах', )
     pub_date = models.DateTimeField(
-        # auto_now_add=True,
         default=timezone.now,
         verbose_name='Дата создания',
         help_text='Дата, когда был создан рецепт',
@@ -81,11 +80,11 @@ class Ingredient(models.Model):
     name = models.CharField(max_length=200,
                             unique=True,
                             verbose_name='Название',
-                            help_text='Название ингредиента', 
+                            help_text='Название ингредиента',
                             db_index=True,)
     measurement_unit = models.CharField(max_length=40,
-                            verbose_name='Единица',
-                            help_text='Единица измерения', )
+                                        verbose_name='Единица',
+                                        help_text='Единица измерения', )
 
     class Meta:
         verbose_name = 'Ингредиент'
@@ -116,7 +115,7 @@ class AmountIngredient(models.Model):
             MinValueValidator(
                 limit_value=0,
                 message='Количество ингредиентов не должно быть отрицательным.'
-                ),]
+                ), ]
         )
 
     class Meta:

@@ -1,32 +1,27 @@
 import io
+import logging
 
-from rest_framework import viewsets, status
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.permissions import (AllowAny, IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly, IsAdminUser)
-from djoser.permissions import CurrentUserOrAdmin
-from django.shortcuts import get_object_or_404
+from core.utilites.pdf import PDF
+from django.db.models import Sum
 from django.http import FileResponse
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters
-
-
-from recipes.models import Cart, Favorite, Ingredient, Tag, Recipe
+from rest_framework import viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
+from rest_framework.response import Response
 from users.models import CustomUser, Subscription
-from .serializers import (CustomUserCreateSerializer, CustomUserSerializer,
-                          IngredientSerializer,
-                          RecipeSerializer, RecipeShortSerializer,
-                          TagSerializer, SubscriptionSerializer,)
-from .pagination import (CustomUsersPagination, SubscriptionPagination,
-                         RecipesPagination)
-from .permissions import isAuthor, isAuthorOrReadOnly
-from core.utilites.pdf import PDF
+
 from api.filters import IngredientFilter, RecipeFilter
+from api.pagination import (CustomUsersPagination, RecipesPagination,
+                            SubscriptionPagination)
+from api.permissions import IsAuthorOrReadOnly
+from api.serializers import (CustomUserCreateSerializer, CustomUserSerializer,
+                             IngredientSerializer, RecipeSerializer,
+                             RecipeShortSerializer, SubscriptionSerializer,
+                             TagSerializer)
+from recipes.models import Cart, Favorite, Ingredient, Recipe, Tag
 
 
-
-import logging
 logger = logging.getLogger(__name__)
 
 
@@ -42,7 +37,6 @@ class CustomUserViewSet(viewsets.ModelViewSet):
         elif self.action == 'create':
             permission_classes = [AllowAny]
         return [permission() for permission in permission_classes]
-
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -71,33 +65,24 @@ class SubscriptionViewSet(viewsets.ModelViewSet):
         serializer = serializer_class(page, many=True, context=context)
         return self.get_paginated_response(serializer.data)
 
-
-    def subscriptions2(self, request):
-        """Список пользователей-последователей."""
-        user = request.user
-        queryset = user.follower.all()
-        serializer = SubscriptionSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-
     @action(detail=True, methods=['POST', 'DELETE'])
     def subscribe(self, request, author_id):
         user = request.user
         author = CustomUser.objects.get(pk=author_id)
         is_subscription = Subscription.objects.filter(
             user=author, following=user).exists()
-        if request.method=='POST' and not is_subscription:
+        if request.method == 'POST' and not is_subscription:
             subscription = Subscription.objects.create(
                 user=author, following=user)
             serializer = SubscriptionSerializer(
                 Subscription.objects.get(id=subscription.id))
             return Response(serializer.data)
-        if request.method=='DELETE' and not is_subscription:
+        if request.method == 'DELETE' and not is_subscription:
             Subscription.objects.get(
                 user=author, following=user).delete()
             return Response()
         return Response('Подписка осталось как было')
-        
+
 
 class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
@@ -115,12 +100,10 @@ class IngredientViewSet(viewsets.ModelViewSet):
     filterset_class = IngredientFilter
 
 
-#  Доступна фильтрация по избранному, автору, списку покупок и тегам.
-
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all().order_by('-pub_date')
     serializer_class = RecipeSerializer
-    permission_classes = (isAuthorOrReadOnly,)
+    permission_classes = (IsAuthorOrReadOnly,)
     pagination_class = RecipesPagination
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
@@ -128,17 +111,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
-
     @action(detail=True,
             methods=['POST', 'DELETE'],
             permission_classes=(IsAuthenticated,))
     def favorite(self, request, pk=None):
         """Добавление и удаление рецепта pk в избранное пользователя."""
-        logger.debug(f'!!!!!!!!!! favorite !!!!!!!!!')
-        logger.debug(f'favorite:\nself:{self}\nrequest:{request}\npk:{pk}')
         user = request.user
         is_favorite = Favorite.objects.filter(user=user, recipe=pk).exists()
-        logger.debug(f'is_favorite: {is_favorite}')
         if request.method == 'POST':
             recipe = Recipe.objects.get(id=pk)
             favorite, created = Favorite.objects.get_or_create(
@@ -150,17 +129,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if request.method == 'DELETE' and not is_favorite:
             Favorite.objects.get(user=user, recipe=pk).delete()
             return Response()
-            
-        return Response('осталось как было')
 
+        return Response('осталось как было')
 
     @action(detail=True,
             methods=['POST', 'DELETE'],
             permission_classes=(IsAuthenticated,))
     def shopping_cart(self, request, pk=None):
         """Добавление и удаление рецепта pk в корзину."""
-        logger.debug(f'!!!!!!!!!! shopping_cart !!!!!!!!!')
-        logger.debug(f'favorite:\nself:{self}\nrequest:{request}\npk:{pk}')
         user = request.user
         is_cart = Cart.objects.filter(user=user, recipe=pk).exists()
         logger.debug(f'is_cart: {is_cart}')
@@ -175,28 +151,21 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if request.method == 'DELETE' and is_cart:
             Cart.objects.get(user=user, recipe=pk).delete()
             return Response(f'{user} удаление рецепта из корзины')
-            
-        return Response(f'{user} осталось как было')
 
+        return Response(f'{user} осталось как было')
 
     @action(detail=False,
             methods=['GET'],
             permission_classes=(IsAuthenticated,))
     def download_shopping_cart(self, request):
         """Загрузить файл корзины."""
-        from django.db.models import Count, Sum
+
         user = request.user
         recipes = user.cart.all()
-        for recipe in recipes:
-            logging.debug(f'recipe: {recipe.recipe.ingredients.values()}')
-        # annotated_results = user.cart.annotation(ingredient_sum = Count(recipe.ingredients))
-        logging.debug(f'1: {recipes}')
-        logging.debug(f"8: {recipes.values('recipe__ingredients__parametrs').annotate(Sum('recipe__ingredients__amount'))}")
         result = (recipes.values(
             'recipe__ingredients__parametrs__name',
             'recipe__ingredients__parametrs__measurement_unit'
             ).annotate(amount=Sum('recipe__ingredients__amount')))
-        logger.debug(result)
         ingredients = [
             {'name': item['recipe__ingredients__parametrs__name'],
              'amount': item['amount'],
@@ -205,54 +174,37 @@ class RecipeViewSet(viewsets.ModelViewSet):
         logger.debug(ingredients)
 
         file_pdf = PDF().creaete_list_ingredients(ingredients,)
-        response = FileResponse(io.BytesIO(file_pdf),
-                                as_attachment=True,
-                                filename="ingredients.pdf")
-        return response
-
+        return FileResponse(io.BytesIO(file_pdf),
+                            as_attachment=True,
+                            filename="ingredients.pdf")
 
     @action(detail=False,
             methods=['GET'],
             permission_classes=(IsAuthenticated,))
     def download_shopping_cart2(self, request):
         """Загрузить файл корзины."""
-        from django.db.models import Count, Sum
         user = request.user
         recipes = user.cart.all()
-        for recipe in recipes:
-            logging.debug(f'recipe: {recipe.recipe.ingredients.values()}')
-        # annotated_results = user.cart.annotation(ingredient_sum = Count(recipe.ingredients))
-        logging.debug(f'1: {recipes}')
-        logging.debug(f"2: {recipes.values('recipe_id').annotate(Count('recipe__ingredients__parametrs'))}")
-        logging.debug(f"3: {recipes.values('recipe_id').annotate(Sum('recipe__ingredients__amount'))}")
-        logging.debug(f"4: {recipes.values('recipe_id').annotate()}")
-        
         result = {}
         for recipe in recipes:
             ingredient = recipe.recipe.ingredients.values('parametrs_id',
                                                           'amount')
-            logging.debug(f'tmp: {ingredient}')
             for item in ingredient:
                 parametrs_id, amount = item['parametrs_id'], item['amount']
                 if parametrs_id in result:
                     result[parametrs_id] += amount
                 else:
                     result[parametrs_id] = amount
-        logging.debug(f'result: {result}')
 
         ingredients = []
         for parametrs_id, amount in result.items():
             ingredient = Ingredient.objects.get(id=parametrs_id)
-            logging.debug(f'ingredient: {ingredient}, {ingredient.name}, {ingredient.measurement_unit}')
             current_ingredient = {'name': ingredient.name,
                                   'amount': amount,
                                   'unit': ingredient.measurement_unit}
             ingredients.append(current_ingredient)
-        logging.debug(f'ingredients: {ingredients}, {type(ingredients)}')
 
         file_pdf = PDF().creaete_list_ingredients(ingredients,)
-        response = FileResponse(io.BytesIO(file_pdf),
-                                as_attachment=True,
-                                filename="ingredients.pdf")
-        return response
-
+        return FileResponse(io.BytesIO(file_pdf),
+                            as_attachment=True,
+                            filename="ingredients.pdf")

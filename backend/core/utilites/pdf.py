@@ -1,25 +1,25 @@
 import os
 
-from fpdf import FPDF
 from django.conf import settings
+from fpdf import FPDF
 
 
 class PDF(FPDF):
     """Создание pdf файла списка ингредиентов для рецептов."""
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        DIR_SCRIPT_PDF=os.path.join(
+        dir_script_pdf = os.path.join(
             settings.BASE_DIR, 'static', 'assets', 'font')
         self.add_font(
-            'open', '', DIR_SCRIPT_PDF + r'/OpenSans-Regular.ttf')
+            'open', '', dir_script_pdf + r'/OpenSans-Regular.ttf')
         self.add_font(
-            'open', 'i', DIR_SCRIPT_PDF + r'/OpenSans-Italic.ttf')
+            'open', 'i', dir_script_pdf + r'/OpenSans-Italic.ttf')
         self.add_font(
-            'open', 'b', DIR_SCRIPT_PDF + r'/OpenSans-Bold.ttf')
+            'open', 'b', dir_script_pdf + r'/OpenSans-Bold.ttf')
         self.add_font(
             'open', 'bi',
-            DIR_SCRIPT_PDF + r'/OpenSans-BoldItalic.ttf')
-        
+            dir_script_pdf + r'/OpenSans-BoldItalic.ttf')
+
     def header(self):
         self.set_font("open", "B", 15)
         self.cell(80)
@@ -43,22 +43,22 @@ class PDF(FPDF):
             unit = item['unit']
             amount = item['amount']
             self.cell(0, 10,
-                     f'{ingredient_name[:1].upper()}{ingredient_name[1:]} - '
-                     f'{amount} {unit}.',
-                     new_x="LMARGIN", new_y="NEXT")
+                      f'{ingredient_name[:1].upper()}{ingredient_name[1:]} - '
+                      f'{amount} {unit}.',
+                      new_x="LMARGIN", new_y="NEXT")
 
     def footer(self):
         self.set_y(-15)
         self.set_font("open", "I", 8)
         self.cell(0, 10, f"Page {self.page_no()}/{{nb}}", align="C")
 
-    def creaete_list_ingredients(self, data, namePDF=None):
+    def creaete_list_ingredients(self, data, name_pdf=None):
         self.add_page()
         self.print_body(data)
-        return self.output(namePDF) if namePDF else self.output()
+        return self.output(name_pdf) if name_pdf else self.output()
 
 
-if __name__== '__main__':
+if __name__ == '__main__':
     name = 'Рецепт 1'
     data = [{'name': 'алкоголь', 'unit': 'стакан', 'amount': 1},
             {'name': 'айран', 'unit': 'г', 'amount': 1},

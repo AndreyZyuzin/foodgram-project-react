@@ -1,14 +1,14 @@
 import base64
+import logging
 
-from rest_framework import serializers
-from djoser.serializers import UserSerializer, UserCreateSerializer
 from django.core.files.base import ContentFile
+from djoser.serializers import UserCreateSerializer, UserSerializer
+from rest_framework import serializers
 
-from users.models import (CustomUser, Subscription)
 from recipes.models import (AmountIngredient, Cart, Favorite, Ingredient,
                             Recipe, Tag)
+from users.models import CustomUser, Subscription
 
-import logging
 logger = logging.getLogger(__name__)
 
 
@@ -28,7 +28,6 @@ class CustomUserSerializer(UserSerializer):
     def get_is_subscribed(self, obj):
         """Проверка является пользователь подписчиком автора."""
         request = self.context.get('request')
-        logger.debug(f'get_is_subscibed: {request.user}')
         user = request.user
         if user.is_anonymous:
             return False
@@ -58,6 +57,7 @@ class IngredientSerializer(serializers.ModelSerializer):
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit')
 
+
 class AmountIngredientSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     measurement_unit = serializers.SerializerMethodField()
@@ -68,21 +68,17 @@ class AmountIngredientSerializer(serializers.ModelSerializer):
 
     def get_name(self, obj):
         return obj.parametrs.name
-    
+
     def get_measurement_unit(self, obj):
         return obj.parametrs.measurement_unit
 
 
 class Base64ImageField(serializers.ImageField):
     def to_internal_value(self, data):
-        logger.debug('to_internal_value Base64ImageField')
         if isinstance(data, str) and data.startswith('data:image'):
             format, imgstr = data.split(';base64,')
             ext = format.split('/')[-1]
-
             data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-            logger.debug('to_internal_value Base64ImageField in if')
-        logger.debug('to_internal_value Base64ImageField out if')
         return super().to_internal_value(data)
 
 
@@ -126,8 +122,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         return Cart.objects.filter(user=user, recipe=obj).exists()
 
     def create(self, validated_data):
-        logger.debug(f'validated_data: {validated_data}')
-        logger.debug(f'initial_data: {self.initial_data}')
         if 'tags' in self.initial_data:
             tags = self.initial_data.pop('tags')
         else:
@@ -150,7 +144,7 @@ class RecipeSerializer(serializers.ModelSerializer):
                 recipe=recipe, parametrs=ingredient, amount=amount)
         return recipe
 
-    def update(self, instance: Recipe, validated_data): 
+    def update(self, instance: Recipe, validated_data):
         if 'tags' in validated_data:
             new_tags_ids = validated_data.pop('tags')
             old_tags = instance.tags.all()
@@ -165,14 +159,12 @@ class RecipeSerializer(serializers.ModelSerializer):
                 tag = Tag.objects.get(id=tag_id)
                 instance.tags.through.objects.update_or_create(
                     recipe=instance, tag=tag)
-                
+
         if 'ingredients' in validated_data:
             new_ingredients = validated_data.pop('ingredients')
             old_ingredients = instance.ingredients.all()
 
             for ingredient in old_ingredients:
-                logger.debug(f'ingredient: {ingredient} {type(ingredient)}')
-                
                 AmountIngredient.objects.get(
                     recipe=instance, parametrs=ingredient.parametrs
                     ).delete()
@@ -203,7 +195,7 @@ class RecipeShortSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time',)
 
-    
+
 class SubscriptionSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source="user.email")
     id = serializers.EmailField(source="user.id")
@@ -231,16 +223,10 @@ class SubscriptionSerializer(serializers.ModelSerializer):
             user=obj.user, following=obj.following).exists()
 
     def get_recipes(self, obj):
-        logging.debug(f'get_recipes {obj}')
         recipes = Recipe.objects.filter(user=obj.user)
-        logging.debug(f'{recipes}')
         serializers = RecipeShortSerializer(recipes, many=True)
         return serializers.data
 
-
-    def get_recipes_count(self,obj):
+    def get_recipes_count(self, obj):
         recipes = Recipe.objects.filter(user=obj.user)
         return recipes.count()
-
-
-

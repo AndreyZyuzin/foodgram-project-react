@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import CartRecipes, ShopingCart
+from shoping_cart.models import CartRecipes, ShopingCart
 
 
 class CartRecipesInline(admin.TabularInline):
@@ -21,5 +21,6 @@ class ShopingCartAdmin(admin.ModelAdmin):
             result += f' и еще {recipes.count() - 3}'
         return result
     get_recipes.short_description = 'Рецепты'
+
 
 admin.site.register(ShopingCart, ShopingCartAdmin)

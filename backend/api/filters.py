@@ -1,18 +1,18 @@
-import django_filters
+import logging
 
-from recipes.models import Cart, Ingredient, Favorite, Recipe, Tag
+import django_filters
+from recipes.models import Cart, Favorite, Recipe, Tag
 from users.models import CustomUser
 
-
-import logging
 logger = logging.getLogger(__name__)
 
 
 BOOLEAN_CHOICES = ((1, True), (0, False))
- 
+
 
 class IngredientFilter(django_filters.FilterSet):
     name = django_filters.CharFilter(lookup_expr='istartswith')
+
 
 class RecipeFilter(django_filters.FilterSet):
     tags = django_filters.ModelMultipleChoiceFilter(
@@ -36,10 +36,6 @@ class RecipeFilter(django_filters.FilterSet):
         if not value:
             return queryset
         favorites = Favorite.objects.filter(user=user)
-        logger.debug(f'queryset: {queryset}')
-        logger.debug(f'favorites: {favorites.values()}')
-        logger.debug(f'result: {queryset.filter(id__in=favorites)}')
-        logger.debug(f'result: {queryset.filter(favorites__in=favorites)}')
         return queryset.filter(favorites__in=favorites)
 
     def get_is_in_shopping_cart(self, queryset, name, value):
@@ -50,7 +46,7 @@ class RecipeFilter(django_filters.FilterSet):
             return queryset
         cart = Cart.objects.filter(user=user)
         return queryset.filter(cart__in=cart)
-    
+
     class Meta:
         model = Recipe
         fields = ('tags', 'author', 'is_favorited', 'is_in_shopping_cart')

@@ -1,5 +1,5 @@
-from django.db import models
 from django.conf import settings
+from django.db import models
 
 from recipes.models import Recipe
 
@@ -31,10 +31,10 @@ class CartRecipes(models.Model):
         ]
 
     shoping_cart = models.ForeignKey(ShopingCart,
-                               on_delete=models.CASCADE,
-                               related_name='recipes',
-                               verbose_name='Корзина',
-                               help_text='Рецепты в корзине',)
+                                     on_delete=models.CASCADE,
+                                     related_name='recipes',
+                                     verbose_name='Корзина',
+                                     help_text='Рецепты в корзине',)
 
     recipe = models.ForeignKey(Recipe,
                                on_delete=models.CASCADE,

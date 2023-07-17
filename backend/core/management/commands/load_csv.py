@@ -8,26 +8,25 @@
         python manage.py load_csv -d
             - Предваритльено удаляются все таблицы
 """
-import os
 import csv
 import logging
-from django.core.management.base import BaseCommand, CommandParser
+import os
 
+from django.core.management.base import BaseCommand, CommandParser
 from foodgram_backend.settings import BASE_DIR
+
 from recipes.models import Ingredient
 
 logger = logging.getLogger(__name__)
-# logging.getLogger('asyncio').setLevel(logging.WARNING)
 
 
 class Command(BaseCommand):
-    # PATH_CSV = os.path.join(BASE_DIR.parent, 'data')
     PATH_CSV = os.path.join(BASE_DIR, 'static', 'data')
     FILES_OF_MODELS = {
         'ingredients.csv': (Ingredient, 'name', 'measurement_unit'),
     }
 
-    def add_arguments(self, parser: CommandParser) -> None:        
+    def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument(
             '-d', '--delete',
             action='store_const', const=True,
@@ -67,5 +66,5 @@ class Command(BaseCommand):
             fields = ('measurement_unit',)
             defaults = {key: ingredient.get(key) for key in fields}
             action = (model.objects.update_or_create if update
-                        else model.objects.get_or_create)
+                      else model.objects.get_or_create)
             obj, created = action(name=name, defaults=defaults)

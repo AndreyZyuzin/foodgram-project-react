@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 import os
-from datetime import timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -87,23 +86,23 @@ WSGI_APPLICATION = 'foodgram_backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT', 5432)
     }
 }
-
-#DATABASES = {
-#    'default': {
-#        'ENGINE': 'django.db.backends.postgresql',
-#        'NAME': os.getenv('POSTGRES_DB'),
-#        'USER': os.getenv('POSTGRES_USER'),
-#        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-#        'HOST': os.getenv('DB_HOST'),
-#        'PORT': os.getenv('DB_PORT', 5432)
-#    }
-#}
 
 
 # Password validation
@@ -181,11 +180,6 @@ DJOSER = {
         'user': ['rest_framework.permissions.AllowAny'],
     }
 }
-
-
-
-
-
 
 
 # Логирование
