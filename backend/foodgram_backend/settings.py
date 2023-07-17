@@ -41,12 +41,10 @@ INSTALLED_APPS = [
     'djoser',
     'rest_framework',
     'rest_framework.authtoken',
-#    'rest_framework_simplejwt',
     'django_filters',
     'users.apps.UsersConfig',
     'api.apps.ApiConfig',
     'recipes.apps.RecipesConfig',
-#    'shoping_cart.apps.ShopingCartConfig',
     'core.apps.CoreConfig',
 ]
 
@@ -176,7 +174,7 @@ DJOSER = {
         'user': 'api.serializers.CustomUserSerializer',
         'current_user': 'api.serializers.CustomUserSerializer',
     },
-    'PERMISSIONS':{
+    'PERMISSIONS': {
         'user': ['rest_framework.permissions.AllowAny'],
     }
 }

@@ -13,6 +13,7 @@ import logging
 import os
 
 from django.core.management.base import BaseCommand, CommandParser
+
 from foodgram_backend.settings import BASE_DIR
 
 from recipes.models import Ingredient
@@ -51,7 +52,7 @@ class Command(BaseCommand):
             reader = csv.DictReader(
                 file,
                 fieldnames=fields_of_model
-                )
+            )
             for numb, row in enumerate(reader):
                 try:
                     data.append(dict(**row))

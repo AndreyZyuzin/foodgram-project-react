@@ -1,6 +1,7 @@
 import logging
 
 import django_filters
+
 from recipes.models import Cart, Favorite, Recipe, Tag
 from users.models import CustomUser
 

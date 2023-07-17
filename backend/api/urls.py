@@ -16,9 +16,9 @@ CustomUserList = CustomUserViewSet.as_view({
 })
 
 CustomUserAction = SubscriptionViewSet.as_view({
-   'get': 'subscriptions',
-   'post': 'subscribe',
-   'delete': 'subscribe',   
+    'get': 'subscriptions',
+    'post': 'subscribe',
+    'delete': 'subscribe',
 })
 
 urlpatterns = [

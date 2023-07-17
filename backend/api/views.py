@@ -1,7 +1,6 @@
 import io
 import logging
 
-from core.utilites.pdf import PDF
 from django.db.models import Sum
 from django.http import FileResponse
 from django_filters.rest_framework import DjangoFilterBackend
@@ -9,7 +8,6 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
-from users.models import CustomUser, Subscription
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import (CustomUsersPagination, RecipesPagination,
@@ -19,8 +17,12 @@ from api.serializers import (CustomUserCreateSerializer, CustomUserSerializer,
                              IngredientSerializer, RecipeSerializer,
                              RecipeShortSerializer, SubscriptionSerializer,
                              TagSerializer)
+
+from core.utilites.pdf import PDF
+
 from recipes.models import Cart, Favorite, Ingredient, Recipe, Tag
 
+from users.models import CustomUser, Subscription
 
 logger = logging.getLogger(__name__)
 
@@ -165,7 +167,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         result = (recipes.values(
             'recipe__ingredients__parametrs__name',
             'recipe__ingredients__parametrs__measurement_unit'
-            ).annotate(amount=Sum('recipe__ingredients__amount')))
+        ).annotate(amount=Sum('recipe__ingredients__amount')))
         ingredients = [
             {'name': item['recipe__ingredients__parametrs__name'],
              'amount': item['amount'],
