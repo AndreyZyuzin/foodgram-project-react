@@ -80,7 +80,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'foodgram_backend.wsgi.application'
 
-
+ENABLE_CHANGE_USER_PASSWORD_ADMIN: True
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 

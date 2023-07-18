@@ -206,7 +206,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                                   'unit': ingredient.measurement_unit}
             ingredients.append(current_ingredient)
 
-        file_pdf = PDF().creaete_list_ingredients(ingredients,)
+        file_pdf = PDF().creaete_list_ingredients(ingredients, 'a.pdf')
         return FileResponse(io.BytesIO(file_pdf),
                             as_attachment=True,
                             filename="ingredients.pdf")

@@ -58,8 +58,15 @@ class Recipe(models.Model):
                                   verbose_name='Тег',
                                   help_text='Теги рецепта',
                                   db_index=True)
-    cooking_time = models.IntegerField(verbose_name='Время готовки',
-                                       help_text='Время готовки в минутах', )
+    cooking_time = models.IntegerField(
+        verbose_name='Время готовки',
+        help_text='Время готовки в минутах',
+        validators=[
+            MinValueValidator(
+                limit_value=1,
+                message='Время готовки должно быть положительным.'
+            ), ]
+    )
     pub_date = models.DateTimeField(
         default=timezone.now,
         verbose_name='Дата создания',

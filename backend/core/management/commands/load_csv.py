@@ -15,7 +15,6 @@ import os
 from django.core.management.base import BaseCommand, CommandParser
 
 from foodgram_backend.settings import BASE_DIR
-
 from recipes.models import Ingredient
 
 logger = logging.getLogger(__name__)

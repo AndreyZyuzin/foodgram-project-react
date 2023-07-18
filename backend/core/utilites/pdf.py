@@ -1,8 +1,8 @@
 import os
 
 from django.conf import settings
-
 from fpdf import FPDF
+import yaml
 
 
 class PDF(FPDF):
@@ -57,13 +57,3 @@ class PDF(FPDF):
         self.add_page()
         self.print_body(data)
         return self.output(name_pdf) if name_pdf else self.output()
-
-
-if __name__ == '__main__':
-    name = 'Рецепт 1'
-    data = [{'name': 'алкоголь', 'unit': 'стакан', 'amount': 1},
-            {'name': 'айран', 'unit': 'г', 'amount': 1},
-            {'name': 'аджика зеленая', 'unit': 'г', 'amount': 10}]
-
-    pdf = PDF().creaete_list_ingredients(data)
-    print(pdf)
