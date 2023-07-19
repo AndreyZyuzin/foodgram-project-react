@@ -32,20 +32,19 @@ ALLOWED_HOSTS=<ip>,127.0.0.1,localhost,<domain>
 OUT_PORT_FOODGRAM=...
 ```
 
-следует войти в эту директорию и запустить несколько команд
+Для запуска следует выйти в папку foodgram
 ```
-cd foodgram
-sudo docker compose -f docker-compose.production.yml pull
-sudo docker compose -f docker-compose.production.yml down
-sudo docker compose -f docker-compose.production.yml up -d
-sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate
-sudo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic
-sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/collected_static/. /backend_static/static/
+make install_and_run
+```
+
+Для создания аккаунта админа, следует выполнить
+```
+make create_superuser
 ```
 
 наполнение базы данных ингредиентов:
 ```
-sudo docker compose -f docker-compose.production.yml exec backend python manage.py load_csv
+make load_ingredients
 ```
 
 ### Автор.

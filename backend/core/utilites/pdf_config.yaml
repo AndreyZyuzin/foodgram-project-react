@@ -1,0 +1,43 @@
+---
+fonts:
+  - family: open
+    style: ''
+    name: OpenSans-Regular.ttf
+  - family: open
+    style: i
+    name: OpenSans-Italic.ttf
+  - family: open
+    style: b
+    name: OpenSans-Bold.ttf
+  - family: open
+    style: bi
+    name: OpenSans-BoldItalic.ttf
+
+header:
+  font:
+    family: open
+    style: b
+    size: 15
+  line_break: 20
+
+footer:
+  pages:
+    font:
+      family: open
+      style: i
+      size: 8
+    align: c
+
+body:
+  title:
+    font:
+      family: open
+      style: b
+      size: 18
+  main:
+    font:
+      family: open
+      style: ''
+      size: 14
+  line_break: 4
+...
