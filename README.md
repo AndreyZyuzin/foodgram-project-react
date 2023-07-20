@@ -48,9 +48,9 @@ make load_ingredients
 ```
 
 ### Данные сервера
-[foodgram](https://xn--80aciep1ase.site/ "Оснавная ссылка")
-или 
-[foodgram](http://51.250.109.52:7000/ "по ip")
+[foodgram](https://xn--80aciep1ase.site/ "Оснавная ссылка")  
+или  
+[foodgram](http://51.250.109.52:7000/ "по ip")  
 
 Панель администрирования:
 [админка](https://xn--80aciep1ase.site/admin/)
