@@ -51,14 +51,14 @@ make load_ingredients
 [foodgram](https://xn--80aciep1ase.site/ "Оснавная ссылка")  
 или  
 [foodgram](http://51.250.109.52:7000/ "по ip")  
-
+  
 Панель администрирования:
-[админка](https://xn--80aciep1ase.site/admin/)
-логин: admin 
-пароль: admin
+[админка](https://xn--80aciep1ase.site/admin/)  
+логин: admin  
+пароль: admin  
 
 ### Другие приложения
-[Taski](http://51.250.109.52:8000/)
+[Taski](http://51.250.109.52:8000/)  
 [kittygram](http://51.250.109.52:9000/)
 
 
