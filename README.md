@@ -54,8 +54,7 @@ make load_ingredients
   
 Панель администрирования:
 [админка](https://xn--80aciep1ase.site/admin/)  
-логин: admin  
-пароль: admin  
+
 
 ### Другие приложения
 [Taski](http://51.250.109.52:8000/)  
